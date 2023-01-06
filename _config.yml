@@ -1,5 +1,5 @@
-title:               Celeste
-url:                 https://nicoelayda.github.io
+title:               A miserable failure
+url:                 https://jwparks.github.io
 baseurl:             ""
 
 markdown:            kramdown
@@ -19,9 +19,9 @@ sass:
   style:             :compressed
 
 author:
-  name:              Nico Elayda
-  url:               nicoelayda.github.io
-  email:             nico@elayda.com
+  name:              Jiwoong Park
+  url:               jwparks.github.io
+  email:             haze@haze.kr
 
 plugins:
   - jekyll-coffeescript
