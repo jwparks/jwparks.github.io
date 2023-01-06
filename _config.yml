@@ -1,29 +1,32 @@
-title:               A miserable failure
-url:                 https://jwparks.github.io
-baseurl:             ""
+title: "Blog Title"
+author: "Blog Author"
+description: "Made with <b style=\"color: #f45;\">&lt;3</b>"
+permalink: /:title/
+lang: "en"
+excerpt_separator: "\n\n\n"
+date_format: "%B %d, %Y"
 
-markdown:            kramdown
-highlighter:         rouge
+# Layout
 
-exclude:             ['*.sublime-*', 'README.md', 'LICENSE', 'Gemfile', 'Gemfile.lock', 'vendor/bundle']
+show_excerpts: true        # show article excerpts on the home page
+show_frame: true           # adds a gray frame to the site
+show_sidebar: false        # show a sidebar instead of the usual header
+minimal: false             # use a dark header
 
-permalink:           pretty
-paginate:            5
-paginate_path:       /blog/:num
+# Menu
 
-blog:
-  truncated_preview: false
+navigation:                # accepts {file, title, url, icon, sidebaricon}
+  - {file: "index.html"}
+  - {file: "README.md"}
 
-sass:
-  sass_dir:          _sass
-  style:             :compressed
+external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
+  - {title: Mail, icon: envelope, url: "mailto:niklasbuschmann@users.noreply.github.com"}
+  - {title: Github, icon: github, url: "https://github.com/niklasbuschmann/contrast"}
+  - {title: Subscribe, icon: rss, url: "/feed.xml"}
 
-author:
-  name:              Jiwoong Park
-  url:               jwparks.github.io
-  email:             haze@haze.kr
+comments:
+#  disqus_shortname: ""    # see https://disqus.com/
+#  isso_domain: ""         # see https://posativ.org/isso/
 
 plugins:
-  - jekyll-coffeescript
-  - jekyll-paginate
-  - jekyll-gist
+ - jekyll-feed
