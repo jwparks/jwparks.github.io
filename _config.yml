@@ -1,4 +1,4 @@
-title: "A Miserable Failure"
+title: "A miserable failure"
 author: "Jiwoong Park"
 description: "Jiwoong Park <b style=\"color: #f45;\">&lt;3</b>"
 url                      : "https://jwparks.github.io" # 현재의 블로그 url 입니다.
@@ -19,7 +19,6 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {file: "about.md"}
-  - {file: "index.html"}
   - {file: "blog.html"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
