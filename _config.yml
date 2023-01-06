@@ -1,6 +1,8 @@
-title: "Blog Title"
-author: "Blog Author"
+title: "A Miserable Failure"
+author: "Jiwoong Park"
 description: "Made with <b style=\"color: #f45;\">&lt;3</b>"
+url                      : "https://jwparks.github.io" # 현재의 블로그 url 입니다.
+repository               : "https://github.com/jwparks/jwparks.github.io" # Github Repo url입니다.
 permalink: /:title/
 lang: "en"
 excerpt_separator: "\n\n\n"
@@ -20,8 +22,8 @@ navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {file: "README.md"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
-  - {title: Mail, icon: envelope, url: "mailto:niklasbuschmann@users.noreply.github.com"}
-  - {title: Github, icon: github, url: "https://github.com/niklasbuschmann/contrast"}
+  - {title: Mail, icon: envelope, url: "mailto:haze@haze.kr"}
+  - {title: Github, icon: github, url: "https://github.com/jwparks/"}
   - {title: Subscribe, icon: rss, url: "/feed.xml"}
 
 comments:
