@@ -1,4 +1,9 @@
-# jwparks.github.io
-Personal blog
+---
+title: "Home"
+layout: page
+sitemap: false
+---
 
-https://jwparks.github.io
+![Front](assets/images/Home_1.png)
+*Claud Monet, Antibes, Vue du plateau Notre-Dame, 1888*
+
