@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="init">
-      <change beforePath="$PROJECT_DIR$/assets/css/frame.sass" beforeDir="false" afterPath="$PROJECT_DIR$/assets/css/frame.sass" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/log.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/_config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-01-01-advanced-examples.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/2017-01-01-advanced-examples.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-02-01-markdown-examples.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2017-02-01-markdown-examples.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-01-welcome-to-jekyll.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2017-03-01-welcome-to-jekyll.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog.html" beforeDir="false" afterPath="$PROJECT_DIR$/dev.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +44,10 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/_posts/log" />
+      <recent name="$PROJECT_DIR$/_posts/dev" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -47,7 +57,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1673034372046</updated>
-      <workItem from="1673034373136" duration="6329000" />
+      <workItem from="1673034373136" duration="7236000" />
+      <workItem from="1673414531021" duration="281000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1673036393136</created>
@@ -182,7 +193,14 @@
       <option name="project" value="LOCAL" />
       <updated>1673040791825</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="init">
+      <created>1673221839739</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1673221839739</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
