@@ -38,6 +38,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/assets" />
       <recent name="$PROJECT_DIR$/_posts/log" />
       <recent name="$PROJECT_DIR$/_posts/dev" />
     </key>
@@ -51,7 +52,7 @@
       <option name="presentableId" value="Default" />
       <updated>1673034372046</updated>
       <workItem from="1673034373136" duration="7236000" />
-      <workItem from="1673414531021" duration="2047000" />
+      <workItem from="1673414531021" duration="2360000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1673036393136</created>
@@ -214,7 +215,21 @@
       <option name="project" value="LOCAL" />
       <updated>1673429215351</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="init">
+      <created>1673429847027</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1673429847027</updated>
+    </task>
+    <task id="LOCAL-00025" summary="init">
+      <created>1673429854644</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1673429854645</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
