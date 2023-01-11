@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="init">
-      <change beforePath="$PROJECT_DIR$/_posts/log/2023-01-11-noname.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2023-01-11-noname.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/log/2023-01-10-noname.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2023-01-10-noname.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -310,7 +310,21 @@
       <option name="project" value="LOCAL" />
       <updated>1673435025140</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="init">
+      <created>1673435392757</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1673435392757</updated>
+    </task>
+    <task id="LOCAL-00038" summary="init">
+      <created>1673435426165</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1673435426165</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
