@@ -18,7 +18,7 @@ minimal: false             # use a dark header
 
 # Menu
 
-navigation:                # accepts {file, title, url, icon, sidebaricon}
+navigation:                # accepts {file, title, url, favicon.ico, sidebaricon}
   - {file: "about.md"}
   - {file: "log.html"}
   - {file: "dev.html"}
