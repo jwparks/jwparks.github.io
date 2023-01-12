@@ -3,6 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="init">
       <change beforePath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/2.png" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/Control-RTX-Comparison-6.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/Control-RTX-Comparison-6.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -360,7 +363,21 @@
       <option name="project" value="LOCAL" />
       <updated>1673552950605</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="init">
+      <created>1673553315558</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1673553315558</updated>
+    </task>
+    <task id="LOCAL-00045" summary="init">
+      <created>1673553452018</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1673553452018</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
