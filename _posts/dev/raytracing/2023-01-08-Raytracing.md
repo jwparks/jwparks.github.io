@@ -37,6 +37,8 @@ categories: Dev
 아마 컴퓨터를 잘 모르시는 분들도 그래픽카드 모델명이 RTX3070이다, RTX4080이다 이런 말들을 들어 보셨을 텐데요, 이렇게 RTX 이름을 달고 있는 그래픽카드들이 바로 RT 코어를 내장하고 있는 그래픽카드들 입니다.
 
 ![0](https://i.ibb.co/m6cnhDy/Control-RTX-Comparison-6.jpg)
+{:.image-caption}
+*The caption for my image*
 
 초당 수십장의 프레임을 렌더링 하는 비디오 게임에서 사용되는 실시간 레이트레이싱 기법은 아직 부족한 점이 많음에도 불구하고,
 2019년 출시된 비디오 게임인 "Control"에서 기존 렌더링 기법(왼쪽)과 실시간 레이트레이싱(오른쪽)을 비교해 보면 빛의 반사와 사물의 그림자에서 확연한 차이가 나는 것을 볼 수 있습니다.
@@ -46,8 +48,7 @@ categories: Dev
 
 > Quiz 1. 레이트레이싱 기법은 왜 광원으로부터 나오는 광선을 직접 추적하지 않고, 이미지로 들어오는 빛을 역추적 할까요?
 
-## Python을 이용한 레이트레이싱 구현
-### 문제와 좌표계를 정의하기
+## 레이트레이싱 문제와 좌표계를 정의하기
 흥미로운 주제가 정해 졌으니 이제 문제와 좌표계를 정의할 차례 입니다. 우리는 궁극적으로 레이트레이싱 기법을 이용하여 2D 이미지를 렌더링 하기를 원합니다. 
 2D 이미지를 렌더링 한다는 의미는, 이미지를 구성하는 픽셀들의 색을 "적절히" 칠한다는 것을 의미합니다. 
 그리고 우리는 각 픽셀들의 색이 그 픽셀로 들어온 광선으로부터 정의될 것이라는 사실을 알고 있습니다.
@@ -64,7 +65,7 @@ categories: Dev
 이렇게 레이트레이싱을 통한 렌더링을 구현하기 위해선 우리의 시점(카메라)로부터 `Scene`의 픽셀을 통과하는 각 광선들이 결국 물체의 어떤 부분에 부딪히는지를 계산하고, 
 이를 통해 각 픽셀의 색을 결정하면 됩니다. 문제를 정의해 보니 정말 간단하죠?
 
-### 광선 벡터
+## 광선 벡터
 우리는 이미지를 구성하는 픽셀의 수 만큼 광선을 추적 해야 합니다. 
 만약 `1920×1080` 해상도의 이미지(`Scene`) 한 장을 렌더링 한다고 가정하면 총 2,073,600개의 광선을 정의하고 추적해야 합니다.
 이러한 광선들은 시작점과 방향이 있는 객체들로 정의하고 구현 할 수 있는데요. 문제는 각 광선들이 향하는 방향이 모두 다르다는 것 입니다.
@@ -107,7 +108,7 @@ class Plane():
         self.color = np.array(color)
 {% endhighlight %}
 
-이제 `Plane()` 클래스를 이용하여 점 $P=(0,0,-1)$을 지나고, $\hat{z}$ 방향에 수직(즉 노말벡터가 $N=(0,0,1)$)인 흰색 평면을 만들어 보겠습니다.
+이제 `Plane()` 클래스를 이용하여 점 $P=(0,0,-1)$을 지나고, $\hat{z}$ 방향에 수직(즉, 노말벡터가 $N=(0,0,1)$)인 흰색 평면을 만들어 보겠습니다.
 만들어진 흰색 평면 `white_plane`을 `1920×1080` 해상도의 `Scene`에 넣고, `Scene`을 렌더링 하기 위한 시점(카메라)을 정의합니다.
 카메라는 공간상에서 원점($C_0=(0,0,0)$)에 존재하고, $\hat{y}$ 축을 바라보고($C_d=(0,1,0)$) 있습니다.  
 
@@ -122,92 +123,27 @@ scene.draw()
 
 이제 직관적으로 각 객체들이 어떻게 어울리는지 이해하셨을 거라고 생각 됩니다. `scene` 객체를 만든 후, 
 해당 `scene` 내에 물체(`white_plane`)와 카메라를 배치하고(`.add_camera()`), 해당 카메라로 사진을 찍고(`.render()`), 이미지를 출력한다고(`.draw()`) 생각하시면 직관적일것 같습니다. 
-레이트레이싱을 통한 이미지 렌더링을 담당하는 `Scene()` 클래스는 다음과 같습니다.
+이미 섹션이 너무 길어졌네요. 이번 섹션에서는 광선 벡터의 방향($ D $)을 이해하는 것이 목적이니 `Scene()` 클래스에서 `.add_camera()`와 `.render()` 메서드를 살펴 보도록 하겠습니다.
+
+`.add_camera()` 메서드는 카메라의 기본적인 속성을 정의하고 있습니다. 
 
 {% highlight python %}
-def normalize(vector):
-    return vector / np.linalg.norm(vector)
-
-class Scene():
-    def __init__(self,
-                 width,
-                 height,
-                 objects):
-        self.w = np.array(width)
-        self.h = np.array(height)
-        self.ratio = width / height
-        self.objects = objects
-        self.image = np.zeros((height, width, 3))
-
-    def add_camera(self,
-                   camera_position,
-                   camera_direction,
-                   depth_limit = 3):
-        self.Co = np.array(camera_position)
-        self.Cd = normalize(np.array(camera_direction) - self.Co)
-        self.Cu = np.array([0,0,1])
-        self.Cr = normalize(np.cross(self.Cd, self.Cu))
-        self.hFOV = 75
-        self.depth = depth_limit
-        self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
-        self.pixel_h = self.pixel_w
-
-    def intersection(self, ray_origin, ray_direction, object):
-        if object.type == 'plane':
-            # Ray-Plane intersection
-            O = ray_origin
-            D = ray_direction
-            P = object.position
-            N = object.normal
-
-            t = np.dot((P-O), N) / np.dot(D, N)
-            if t > 10e4 or t < 0:
-                distance = np.inf
-            else:
-                distance = t
-            intersection = O + distance*ray_direction
-            return distance, intersection
-
-    def trace(self, ray_origin, ray_direction):
-        # Step 1: Find the closest object
-        max_distance = np.inf
-        closest_object = None
-        M = None # closest intersection point
-        for o, obj in enumerate(self.objects):
-            distance, intersection = self.intersection(ray_origin, ray_direction, obj)
-            if distance < max_distance:
-                max_distance = distance
-                closest_object = obj
-                M = intersection
-        if max_distance == np.inf: # no object
-            return np.zeros(3)
-
-        # Step 2: Get properties of the closest object
-        color = closest_object.color
-        # Step 3:
-        return color
-
-    def render(self):
-        for x in range(self.w):
-            for y in range(self.h):
-                dx = self.pixel_w * (x - self.w/2)
-                dy = - self.pixel_h * (y - self.h/2)
-
-                O = self.Co # Origin of ray
-                D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
-
-                color = self.trace(O, D)
-                self.image[y,x] = np.clip(color, 0, 1)
-
-    def draw(self, dpi=300):
-        plt.figure(dpi=dpi)
-        plt.imshow(self.image)
-        plt.show()
+def add_camera(self,
+               camera_position,
+               camera_direction,
+               depth_limit = 3):
+    self.Co = np.array(camera_position)
+    self.Cd = normalize(np.array(camera_direction) - self.Co)
+    self.Cu = np.array([0,0,1])
+    self.Cr = normalize(np.cross(self.Cd, self.Cu))
+    self.hFOV = 75
+    self.depth = depth_limit
+    self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
+    self.pixel_h = self.pixel_w
 {% endhighlight %}
 
-이미 섹션이 너무 길어졌네요. 이번 섹션에서는 광선 벡터의 방향($ D $)을 이해하는 것이 목적이니 `Scene()` 클래스에서 `.render()` 메서드를 살펴 보도록 하겠습니다.
-우리는 `.render()` 메서드를 통해 원점(`Co`, $C_0=(0,0,0)$)에서 출발하여 이미지의 픽셀 `(x,y)`를 향하는 광선의 방향 벡터 $ D $ 를 계산합니다.
-카메라의 방향(`Cd`, $C_d = (0,1,0)$)으로부터 변위 `(dx, dy)`를 계산하여 광선의 방향 벡터 $ D $를 결정한다고 이해하시면 되겠습니다. 
+우리는 `.render()` 메서드를 통해 카메라가 존재하는 원점(`Co`)에서 출발하여 이미지의 픽셀 `(x,y)`를 향하는 광선의 방향 벡터 $ D $ 를 계산합니다.
+카메라의 렌즈가 향하는 방향(`Cd`)으로부터 변위 `(dx, dy)`를 계산하여 광선의 방향 벡터 $ D $를 결정한다고 이해하시면 되겠습니다. 
 
 {% highlight python %}
 def render(self):
@@ -223,7 +159,8 @@ def render(self):
             self.image[y,x] = np.clip(color, 0, 1)
 {% endhighlight %}
 
-### 광선 벡터의 충돌과 해석적 방법
-#### Ray-Plane intersection
+## 광선 벡터의 충돌과 해석적 방법
+### Ray-Plane intersection
+
 
 
