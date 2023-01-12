@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="init">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/Control-RTX-Comparison-6.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,20 +67,6 @@
       <updated>1673034372046</updated>
       <workItem from="1673034373136" duration="7236000" />
       <workItem from="1673414531021" duration="4787000" />
-    </task>
-    <task id="LOCAL-00001" summary="init">
-      <created>1673036393136</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1673036393136</updated>
-    </task>
-    <task id="LOCAL-00002" summary="init">
-      <created>1673036553412</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1673036553412</updated>
     </task>
     <task id="LOCAL-00003" summary="init">
       <created>1673036707283</created>
@@ -413,7 +397,21 @@
       <option name="project" value="LOCAL" />
       <updated>1673554885603</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="init">
+      <created>1673555341327</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1673555341327</updated>
+    </task>
+    <task id="LOCAL-00051" summary="init">
+      <created>1673555350790</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1673555350790</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
