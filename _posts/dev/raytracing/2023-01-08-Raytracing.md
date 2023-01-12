@@ -30,7 +30,7 @@ categories: Dev
 다른 렌더링 기법 대비 레이트레이싱의 장점은 **매우 현실적인 그래픽**을 렌더링 할 수 있다는 장점이 있습니다.
 당연히 실제 현실의 물리계에서 일어나는 빛의 반사를 가장 직관적으로 구현한 기법이기 때문에 현실적인 그래픽을 만들 수 있습니다.
 반면 단점은 이미지를 구성하기 위해 필요한 수 많은 광선 다발을 추적해야 하기 때문에 극도로 높은 컴퓨터 자원을 필요로 합니다. 
-그래서 레이트레이싱은 1980년대 제안된 매우 오래된 컴퓨터 그래픽스 기법이지만, 그동안은 매우 제한된 환경에서만 활용되어 왔습니다. 
+그래서 레이트레이싱은 1980년대에 제안된 컴퓨터 그래픽스 기법이지만, 그동안은 매우 제한된 환경에서만 활용되어 왔습니다. 
 그래픽을 실시간으로 렌더링해야 하는 비디오 게임 등에서는 거의 사용되지 않았고, 미리 렌더링을 해서 보여 줄 수 있는 영화, 애니메이션 등에서 주로 활용되어 왔습니다.
 하지만 현대 컴퓨터 하드웨어의 발전을 통해 가정용 컴퓨터에 들어가는 그래픽카드들이 레이트레이싱 전용 직접회로인 RT 코어를 탑재하며
 실시간 렌더링을 필요로 하는 비디오 게임 등에서도 제한적으로 레이트레이싱 기법이 활용되고 있습니다. 
@@ -119,4 +119,91 @@ scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
 scene.get_image()
 scene.draw_image()
 {% endhighlight %}
+
+이제 직관적으로 각 객체들이 어떻게 어울리는지 이해하셨을 거라고 생각 됩니다. `scene` 객체를 만든 후, 
+해당 객체에 사물(여기서는 흰색 평면)과 카메라를 배치하고, 해당 카메라로 사진을 찍고, 이미지를 출력한다고 생각하시면 직관적일것 같습니다.
+
+`Scene()` 클래스는 다음과 같습니다.
+
+{% highlight python %} 
+def normalize(vector):
+    return vector / np.linalg.norm(vector)
+
+class Scene():
+    def __init__(self,
+                 width,
+                 height,
+                 objects):
+        self.w = np.array(width)
+        self.h = np.array(height)
+        self.ratio = width / height
+        self.objects = objects
+        self.image = np.zeros((height, width, 3))
+
+    def add_camera(self,
+                   camera_position,
+                   camera_direction,
+                   depth_limit = 3):
+        self.Co = np.array(camera_position)
+        self.Cd = normalize(np.array(camera_direction) - self.Co)
+        self.Cu = np.array([0,0,1])
+        self.Cr = normalize(np.cross(self.Cd, self.Cu))
+        self.hFOV = 75
+        self.depth = depth_limit
+        self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
+        self.pixel_h = self.pixel_w
+
+    def get_intersection(self, ray_origin, ray_direction, object):
+        if object.type == 'plane':
+            # Ray-Plane intersection
+            O = ray_origin
+            D = ray_direction
+            P = object.position
+            N = object.normal
+
+            t = np.dot((P-O), N) / np.dot(D, N)
+            if t > 10e4 or t < 0:
+                distance = np.inf
+            else:
+                distance = t
+            intersection = O + distance*ray_direction
+            return distance, intersection
+
+    def trace_ray(self, ray_origin, ray_direction):
+        # Step 1: Find the closest object
+        max_distance = np.inf
+        closest_object = None
+        M = None # closest intersection point
+        for o, obj in enumerate(self.objects):
+            distance, intersection = self.get_intersection(ray_origin, ray_direction, obj)
+            if distance < max_distance:
+                max_distance = distance
+                closest_object = obj
+                M = intersection
+        if max_distance == np.inf: # no object
+            return np.zeros(3)
+
+        # Step 2: Get properties of the closest object
+        color = closest_object.color
+        # Step 3:
+        return color
+
+    def get_image(self):
+        for x in range(self.w):
+            for y in range(self.h):
+                dx = self.pixel_w * (x - self.w/2)
+                dy = - self.pixel_h * (y - self.h/2)
+
+                O = self.Co # Origin of ray
+                R = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
+
+                color = self.trace_ray(O, R)
+                self.image[y,x] = np.clip(color, 0, 1)
+
+    def draw_image(self, dpi=300):
+        plt.figure(dpi=dpi)
+        plt.imshow(self.image)
+        plt.show()
+{% endhighlight %}
+
 
