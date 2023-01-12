@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="init">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/dev/raytracing/2023-01-08-Raytracing.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/images/raytracing/Control-RTX-Comparison-6.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -404,7 +406,14 @@
       <option name="project" value="LOCAL" />
       <updated>1673554313679</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="init">
+      <created>1673554885603</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1673554885603</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
