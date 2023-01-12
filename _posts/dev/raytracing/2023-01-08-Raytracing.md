@@ -36,7 +36,7 @@ categories: Dev
 실시간 렌더링을 필요로 하는 비디오 게임 등에서도 제한적으로 레이트레이싱 기법이 활용되고 있습니다. 
 아마 컴퓨터를 잘 모르시는 분들도 그래픽카드 모델명이 RTX3070이다, RTX4080이다 이런 말들을 들어 보셨을 텐데요, 이렇게 RTX 이름을 달고 있는 그래픽카드들이 바로 RT 코어를 내장하고 있는 그래픽카드들 입니다.
 
-![0](https://i.ibb.co/m6cnhDy/Control-RTX-Comparison-6.jpg)
+[![Control-RTX-Comparison-6.jpg](https://i.postimg.cc/5tJrFLrx/Control-RTX-Comparison-6.jpg)](https://postimg.cc/SnZdB2q5)
 
 초당 수십장의 프레임을 렌더링 하는 비디오 게임에서 사용되는 실시간 레이트레이싱 기법은 아직 부족한 점이 많음에도 불구하고,
 2019년 출시된 비디오 게임인 "Control"에서 기존 렌더링 기법(왼쪽)과 실시간 레이트레이싱(오른쪽)을 비교해 보면 빛의 반사와 사물의 그림자에서 확연한 차이가 나는 것을 볼 수 있습니다.
@@ -52,7 +52,7 @@ categories: Dev
 2D 이미지를 렌더링 한다는 의미는, 이미지를 구성하는 픽셀들의 색을 "적절히" 칠한다는 것을 의미합니다. 
 그리고 우리는 각 픽셀들의 색이 그 픽셀로 들어온 광선으로부터 정의될 것이라는 사실을 알고 있습니다.
 
-![1](https://i.ibb.co/nBbSDkp/1.png)
+[![1.png](https://i.postimg.cc/6p4Khrzn/1.png)](https://postimg.cc/mP4KLFvg)
 
 위 그림에는 2D 이미지(프레임)인 `Scene`의 픽셀 $ P(a) $, $P(b)$, $P(c)$를 각각 통과하는 세개의 광선 $R(a)$, $R(b)$, $R(c)$이 그려져 있습니다.
 광선 $R(a)$의 경우 정의된 물체인 파란색 구에서 반사되어 광원을 향하고 있습니다. 이 경우 우리는 픽셀 $P(a)$를 어떤 색으로 칠해야 할까요? 
@@ -73,5 +73,6 @@ categories: Dev
 카메라의 위치 $\vec{C_0}(x,y,z)$와 방향 $\vec{C_d}(x,y,z)$, 카메라의 시야각($ \text{FOV}(\theta) $)이 정해지면 각 픽셀을 통과하는 광선들의 공간 벡터의 방향을 계산 할 수 있습니다. 
 물론 카메라는 렌즈를 통과하는 회전축을 중심으로 회전(`roll`)이 가능한데, 이 경우는 카메라의 위쪽이 항상 $\hat{z}$ 방향을 향한다고 가정하여 카메라의 `roll` 방향 회전은 고려하지 않겠습니다.
 
-![2](https://i.ibb.co/XsWVXV5/2.png)
+[![2.png](https://i.postimg.cc/HWvFPJr2/2.png)](https://postimg.cc/w3JW1jcy)
+
 
