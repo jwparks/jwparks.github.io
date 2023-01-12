@@ -109,7 +109,7 @@ class Plane():
 
 이제 `Plane()` 클래스를 이용하여 점 $P=(0,0,-1)$을 지나고, $\hat{z}$ 방향에 수직(즉 노말벡터가 $N=(0,0,1)$)인 흰색 평면을 만들어 보겠습니다.
 만들어진 흰색 평면 `white_plane`을 `1920×1080` 해상도의 `Scene`에 넣고, `Scene`을 렌더링 하기 위한 시점(카메라)을 정의합니다.
-카메라는 공간상에서 원점($C=(0,0,0)$)에 존재하고, $\hat{y}$ 축을 바라보고($D=(0,0,1)$) 있습니다.  
+카메라는 공간상에서 원점($C_0=(0,0,0)$)에 존재하고, $\hat{y}$ 축을 바라보고($C_d=(0,1,0)$) 있습니다.  
 
 {% highlight python %}
 white_plane = Plane(position=(0,0,-1), normal=(0,0,1), color=(1,1,1))
@@ -174,7 +174,7 @@ class Scene():
         closest_object = None
         M = None # closest intersection point
         for o, obj in enumerate(self.objects):
-            distance, intersection = self.get_intersection(ray_origin, ray_direction, obj)
+            distance, intersection = self.intersection(ray_origin, ray_direction, obj)
             if distance < max_distance:
                 max_distance = distance
                 closest_object = obj
@@ -194,9 +194,9 @@ class Scene():
                 dy = - self.pixel_h * (y - self.h/2)
 
                 O = self.Co # Origin of ray
-                R = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
+                D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
 
-                color = self.trace_ray(O, R)
+                color = self.trace(O, D)
                 self.image[y,x] = np.clip(color, 0, 1)
 
     def draw(self, dpi=300):
@@ -204,5 +204,26 @@ class Scene():
         plt.imshow(self.image)
         plt.show()
 {% endhighlight %}
+
+이미 섹션이 너무 길어졌네요. 이번 섹션에서는 광선 벡터의 방향($ D $)을 이해하는 것이 목적이니 `Scene()` 클래스에서 `.render()` 메서드를 살펴 보도록 하겠습니다.
+우리는 `.render()` 메서드를 통해 원점(`Co`, $C_0=(0,0,0)$)에서 출발하여 이미지의 픽셀 `(x,y)`를 향하는 광선의 방향 벡터 $ D $ 를 계산합니다.
+카메라의 방향(`Cd`, $C_d = (0,1,0)$)으로부터 변위 `(dx, dy)`를 계산하여 광선의 방향 벡터 $ D $를 결정한다고 이해하시면 되겠습니다. 
+
+{% highlight python %}
+def render(self):
+    for x in range(self.w):
+        for y in range(self.h):
+            dx = self.pixel_w * (x - self.w/2)
+            dy = - self.pixel_h * (y - self.h/2)
+
+            O = self.Co # Origin of ray
+            D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
+
+            color = self.trace(O, D)
+            self.image[y,x] = np.clip(color, 0, 1)
+{% endhighlight %}
+
+### 광선 벡터의 충돌과 해석적 방법
+#### Ray-Plane intersection
 
 
