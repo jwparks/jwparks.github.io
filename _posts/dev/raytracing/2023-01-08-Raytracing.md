@@ -116,16 +116,15 @@ white_plane = Plane(position=(0,0,-1), normal=(0,0,1), color=(1,1,1))
 
 scene = Scene(width=1920, height=1080, objects=[white_plane])
 scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
-scene.get_image()
-scene.draw_image()
+scene.render()
+scene.draw()
 {% endhighlight %}
 
 이제 직관적으로 각 객체들이 어떻게 어울리는지 이해하셨을 거라고 생각 됩니다. `scene` 객체를 만든 후, 
-해당 객체에 사물(여기서는 흰색 평면)과 카메라를 배치하고, 해당 카메라로 사진을 찍고, 이미지를 출력한다고 생각하시면 직관적일것 같습니다.
+해당 `scene` 내에 물체(`white_plane`)와 카메라를 배치하고(`.add_camera()`), 해당 카메라로 사진을 찍고(`.render()`), 이미지를 출력한다고(`.draw()`) 생각하시면 직관적일것 같습니다. 
+레이트레이싱을 통한 이미지 렌더링을 담당하는 `Scene()` 클래스는 다음과 같습니다.
 
-`Scene()` 클래스는 다음과 같습니다.
-
-{% highlight python %} 
+{% highlight python %}
 def normalize(vector):
     return vector / np.linalg.norm(vector)
 
@@ -153,7 +152,7 @@ class Scene():
         self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
         self.pixel_h = self.pixel_w
 
-    def get_intersection(self, ray_origin, ray_direction, object):
+    def intersection(self, ray_origin, ray_direction, object):
         if object.type == 'plane':
             # Ray-Plane intersection
             O = ray_origin
@@ -169,7 +168,7 @@ class Scene():
             intersection = O + distance*ray_direction
             return distance, intersection
 
-    def trace_ray(self, ray_origin, ray_direction):
+    def trace(self, ray_origin, ray_direction):
         # Step 1: Find the closest object
         max_distance = np.inf
         closest_object = None
@@ -188,7 +187,7 @@ class Scene():
         # Step 3:
         return color
 
-    def get_image(self):
+    def render(self):
         for x in range(self.w):
             for y in range(self.h):
                 dx = self.pixel_w * (x - self.w/2)
@@ -200,7 +199,7 @@ class Scene():
                 color = self.trace_ray(O, R)
                 self.image[y,x] = np.clip(color, 0, 1)
 
-    def draw_image(self, dpi=300):
+    def draw(self, dpi=300):
         plt.figure(dpi=dpi)
         plt.imshow(self.image)
         plt.show()
