@@ -209,16 +209,110 @@ def trace(self, ray_origin, ray_direction):
 먼저 광선이 평면에 닿는 경우를 생각해 보겠습니다. 점 $O$로부터 방향 $D$를 갖고 나아가는 광선은 한쪽 방향으로 나아가는 직선으로 표현 할 수 있습니다.
 직선에 속한 수많은 점들을 매개변수식으로 표현하면 다음과 같습니다.
 
-$$ O + tD (t>0)$$
+$$ O + tD$$
 
-방향벡터 $D$의 크기는 1이므로 $t$는 점 $O$로부터의 거리가 될 것입니다. 광선은 한쪽 방향으로 뻗어나가니 $t$가 양수일 때만 고려하면 되겠습니다.
+방향벡터 $D$의 크기는 1이므로 $t$는 점 $O$로부터의 거리가 될 것입니다. 광선은 한쪽 방향으로 뻗어나가니 $t>0$인 조건에서만 고려하면 되겠습니다.
 
 이제 평면을 정의해 보겠습니다. 
 수학적으로 공간에 위치한 평면은 평면 상의 점 $P_0$를 포함하고, 노말 벡터 $N$에 수직인 점들로 표현 할 수 있습니다.
 즉 평면 위의 임의의 벡터($\vec{PP_0}$)는 노말 벡터 $N$에 수직이므로, 평면을 매개변수식으로 표현하면 다음과 같습니다.
 
-$$ (P-P_0) \dot N = 0 $$
+$$ (P-P_0) \cdot N = 0 $$
 
+직선 $O+tD$와 평면 $ (P-P_0) \cdot N = 0 $ 사이의 관계를 그림으로 나타내면 다음과 같습니다.
+직선과 평면의 교차점을 $I$라고 할 때, I는 두 매개변수 방정식 $I=O+t_{I}D$와 $(I-P_0) \cdot N = 0$을 만족하게 됩니다.
+
+![5](https://i.ibb.co/jWmwkbj/5.png)
+
+직선이 평면에 포함되거나 평행하지 않을 때(즉, $D \cdot N =/= 0$), 이를 만족하는 $t$는 다음과 같습니다.
+
+$$ t = \frac{(P_0 - O) \cdot N}{D \cdot N} $$
+
+위 방정식을 통해 우리는 교차점의 좌표 $I$와 교차점까지의 거리 $t$를 계산 할 수 있습니다. `.intersection()` 메서드의 코드는 다음과 같습니다. 
+$t$가 매우 큰 경우($ t > 10^4$), 우리는 광선이 평면을 지나지 않는다고(평면과 평행하다고) 볼 수 있습니다. 이런 경우 교차점까지의 거리는 `np.inf`가 됩니다.
+마찬가지로 $t$ 가 음수인 경우($ t < 0 $) 역시 광선이 반대 방향으로 날아가기 때문에 평면과 만나지 않는다고 볼 수 있습니다.
+
+{% highlight python %}
+def intersection(self, ray_origin, ray_direction, object):
+    if object.type == 'plane':
+        # Ray-Plane intersection
+        O = ray_origin
+        D = ray_direction
+        P0 = object.position
+        N = object.normal
+
+        t = np.dot((P0-O), N) / np.dot(D, N)
+        if t > 10e4 or t < 0:
+            distance = np.inf
+        else:
+            distance = t
+        intersection = O + distance*ray_direction
+        return distance, intersection
+{% endhighlight %}
+
+이렇게 광선과 평면의 공간 벡터를 이용하여 평면이 카메라 상에서 어떻게 보이는지 계산해 보았습니다. 
+위 코드를 이용해 `scene`을 렌더링 하면 Figure 4와 같은 결과를 볼 수 있습니다. 
+하지만 Figure 4에서 보실 수 있다 시피 단색 컬러를 입힌 평면은 그렇게 공간감이 느껴지지 않습니다. 
+위에서 만든 `Plane()` 클래스를 조금 응용하여 체커보드 객체를 생성하는 `Checkerboard()` 클래스를 만들 수 있습니다.
+
+`Checkerboard()` 클래스는 `xy` 평면 상에서 검은색과 흰색 타일이 반복적으로 놓인 구조입니다. 
+다시 말해 평면 위 점의 위치에 따라 객체의 `.color` 속성이 달라져야 합니다. 
+따라서 `.color` 속성을 동적으로 바꿔 줄 수 있는 `.colorize()` 메서드를 추가하여 `Checkerboard()` 클래스를 구성합니다.
+
+{% highlight python %}
+class Checkerboard():
+    def __init__(self, position, normal):
+        self.type = 'checkerboard'
+        self.position = np.array(position)
+        self.normal = normalize(np.array(normal))
+
+    def colorize(self, color):
+        self.color = color
+{% endhighlight %}
+
+이제 `.intersection()` 메서드에 광선이 물체에 닿는 교차점의 좌표 $I$에 따라 `Checkerboard()` 클래스의 `.colorize()` 메서드를 호출 할 수 있는 흐름 제어를 넣습니다. 
+교차점(`intersection`)의 `xy` 좌표에 따라 `Checkerboard()` 클래스의 `.color` 속성을 흰색(`np.ones(3)`) 혹은 검정색(`np.zeros(3)`)으로 업데이트 해 줍니다.
+
+{% highlight python %}
+def intersection(self, ray_origin, ray_direction, object):
+    if object.type == 'plane' or object.type == 'checkerboard':
+        # Ray-Plane intersection
+        O = ray_origin
+        D = ray_direction
+        P = object.position
+        N = object.normal
+
+        distance = np.dot((P-O), N) / np.dot(D, N)
+        if distance > 10e4 or distance < 0:
+            distance = np.inf
+        intersection = O + distance*ray_direction
+
+        if object.type == 'checkerboard':
+            if distance != np.inf:
+                if np.floor(intersection[0]) % 2 == np.floor(intersection[1]) % 2:
+                    color = np.ones(3)
+                else:
+                    color = np.zeros(3)
+                object.colorize(color)
+
+        return distance, intersection
+{% endhighlight %}
+
+이제 Figure 4에서 그린 흰색 평면 대신 같은 위치에 `checkerboard` 객체를 생성하여 `scene`을 렌더링 합니다.
+
+{% highlight python %}
+checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1))
+
+scene = Scene(width=1920, height=1080, objects=[checkerboard])
+scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
+scene.get_image()
+scene.draw_image(dpi=300)
+{% endhighlight %}
+
+결과는 다음과 같습니다. 어떤가요? 실제로 카메라를 통해 공간 상에 위치한 평면을 렌더링 했다는 것이 잘 느껴지시죠? 
+이제 더 다양한 물체를 구현해 보도록 하겠습니다.
+
+![6](https://i.ibb.co/D83KKV2/6.png)
 
 ### Ray-Sphere intersection
 
