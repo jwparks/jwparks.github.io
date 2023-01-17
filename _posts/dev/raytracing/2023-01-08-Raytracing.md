@@ -215,7 +215,7 @@ $$ O + tD$$
 
 이제 평면을 정의해 보겠습니다. 
 수학적으로 공간에 위치한 평면은 평면 상의 점 $P_0$를 포함하고, 노말 벡터 $N$에 수직인 점들로 표현 할 수 있습니다.
-즉 평면 위의 임의의 벡터($\vec{PP_0}$)는 노말 벡터 $N$에 수직이므로, 평면을 매개변수식으로 표현하면 다음과 같습니다.
+즉 평면 위의 임의의 벡터($P-P_0$)는 노말 벡터 $N$에 수직이므로, 평면을 매개변수 방정식으로 표현하면 다음과 같습니다.
 
 $$ (P-P_0) \cdot N = 0 $$
 
@@ -270,7 +270,7 @@ class Checkerboard():
         self.color = color
 {% endhighlight %}
 
-이제 `.intersection()` 메서드에 광선이 물체에 닿는 교차점의 좌표 $I$에 따라 `Checkerboard()` 클래스의 `.colorize()` 메서드를 호출 할 수 있는 흐름 제어를 넣습니다. 
+이제 `.intersection()` 메서드에 광선이 물체에 닿는 교차점의 좌표 $I$에 따라 `Checkerboard()` 클래스의 `.colorize()` 메서드를 호출 할 수 있는 분기를 넣습니다. 
 교차점(`intersection`)의 `xy` 좌표에 따라 `Checkerboard()` 클래스의 `.color` 속성을 흰색(`np.ones(3)`) 혹은 검정색(`np.zeros(3)`)으로 업데이트 해 줍니다.
 
 {% highlight python %}
@@ -362,17 +362,20 @@ $$  D^2 t^2 + 2D(O-P_0) t +  \lvert O-P_0 \rvert ^2 - R^2 = 0  $$
 $$ t=\frac{-b \pm \sqrt{b^2-4ac}}{2a} $$
 
 방정식의 다항계수 $a$, $b$, $c$는 각각 다음과 같습니다. 
-$$
-\begin{align}   
+$$ \begin{align*}   
 a&=D^2    \\
 b&=2D(O-P_0)    \\
 c&=\lvert O-P_0 \rvert ^2 - R^2
-\end{align}
-$$
+\end{align*} $$
+
+우리는 판별식 $b^2 - 4ac$의 부호에 따라 실수해의 조건을 판정합니다.
+`.intersection()` 메서드에 `object`의 `.type` 속성이 `'sphere'`인 분기를 넣어 광선과 구의 교차점의 좌표와 거리를 계산합니다. 
+이때 $b^2 - 4ac>0$인 경우 광선은 구 위의 두 교차점 $I_1$과 $I_2$를 지나므로
+광선에서 먼저 닿는 교차점, 즉 매개변수 $t$가 더 작은 교차점을 판단하는 분기문을 넣습니다. 
 
 {% highlight python %}
         if object.type == 'sphere':
-             # Ray-Sphere intersection
+            # Ray-Sphere intersection
             O = ray_origin
             D = ray_direction
             P0 = object.position
@@ -403,3 +406,27 @@ $$
             intersection = O + distance*ray_direction
             return distance, intersection
 {% endhighlight %}
+
+이제 `Sphere()` 클래스를 이용하여 `scene` 상에 빨간색 구와 파란색 구를 추가해 보도록 하겠습니다.
+이전에 미리 정의해 둔 체커보드는 $z=-1$인 평면이므로, 해당 평면 위에 구를 올리기 위해
+각 구의 중심점(`position`)의 좌표를 $z=-1+r$로 정의해 주었습니다. 
+
+{% highlight python %}
+checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1))
+red_ball = Sphere(position=(0.0, 5, -1+0.8), radius=0.8, color=(1,0,0))
+blue_ball = Sphere(position=(1.0, 4, -1+0.5), radius=0.5, color=(0,0,1))
+
+scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball])
+scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
+scene.render()
+scene.draw()
+{% endhighlight %}
+
+위 코드를 통해 렌더링한 `scene`은 다음과 같습니다.
+
+![8](https://i.ibb.co/f0NdYRC/8.png)
+
+## 빛과 반사 모델
+
+
+
