@@ -170,11 +170,54 @@ def render(self):
 이렇게 뻗어나간 광선은 시작점($O$)과 방향($D$)을 갖고 있습니다. 다음 섹션에서는 이제 `.trace()` 메서드를 통해 해당 광선이 어떤 물체에 충돌하였는지 계산해 보겠습니다.
 
 ## 광선 벡터와 물체의 상호작용
-각 광선은 
+먼저 우리는 카메라의 중심점 $O$로부터 방향 $D$를 갖고 뻗어나가는 각 광선이 처음으로 만나는 물체가 무엇인지 추적해야 합니다. 
+`.trace()` 메서드는 다시 `.intersection()` 메서드를 호출하여 광선과 `scene`에 존재하는 각 물체들의 교차 좌표(`intersection`)와 거리(`distance`)를 계산하고,
+가장 가까이 있는 물체와 그 거리를 계산합니다. 만약 최소 거리(`min_distance`)가 `np.inf`일 경우 해당 광선이 어떤 물체와도 부딪히지 않는다고 볼 수 있습니다.
+
+{% highlight python %}
+def trace(self, ray_origin, ray_direction):
+    # Step 1: Find the closest object
+    min_distance = np.inf
+    closest_object = None
+    M = None # closest intersection point
+    for o, obj in enumerate(self.objects):
+        distance, intersection = self.intersection(ray_origin, ray_direction, obj)
+        if distance < min_distance:
+            min_distance = distance
+            closest_object = obj
+            M = intersection
+    if min_distance == np.inf: # no object
+        return np.zeros(3)
+
+    # Step 2: Get properties of the closest object
+    color = closest_object.color
+    # Step 3:
+    return color
+{% endhighlight %}
+
+이렇게 각 광선이 처음으로 만나는 물체의 특징이 `scene`을 렌더링 할 때의 색을 결정합니다. 
+이후 우리가 다양한 기법을 적용하여 더 현실적은 그래픽을 렌더링 할 수 있지만, 
+여기서는 그냥 가장 가까운 물체의 색(`closest_object.color`)을 바로 적용해 보겠습니다.
+
+`.trace()` 메서드의 핵심은 `.intersection()` 메서드를 호출하여 광선과 물체의 거리와 좌표를 계산하는데 있습니다.
+그런데 조금 생각해 보시면 금방 이 부분이 그다지 간단하지 않다는 것을 알 수 있습니다. 
+같은 위치에 있다고 하더라도 평면, 구, 정육면체 등 물체의 모양이 다 다르고, 빛을 받는 면의 각도에 따라 거리와 좌표가 달라질 수 있기 때문입니다.
+이제 우리는 이 문제를 풀기 위해 공간벡터를 이용하여 각 물체에 대해 정의하고, 벡터 계산을 통해 거리와 좌표를 계산해 보겠습니다.
 
 
 ### Ray-Plane intersection
+먼저 광선이 평면에 닿는 경우를 생각해 보겠습니다. 점 $O$로부터 방향 $D$를 갖고 나아가는 광선은 한쪽 방향으로 나아가는 직선으로 표현 할 수 있습니다.
+직선에 속한 수많은 점들을 매개변수식으로 표현하면 다음과 같습니다.
 
+$$ O + tD (t>0)$$
+
+방향벡터 $D$의 크기는 1이므로 $t$는 점 $O$로부터의 거리가 될 것입니다. 광선은 한쪽 방향으로 뻗어나가니 $t$가 양수일 때만 고려하면 되겠습니다.
+
+이제 평면을 정의해 보겠습니다. 
+수학적으로 공간에 위치한 평면은 평면 상의 점 $P_0$를 포함하고, 노말 벡터 $N$에 수직인 점들로 표현 할 수 있습니다.
+즉 평면 위의 임의의 벡터($\vec{PP_0}$)는 노말 벡터 $N$에 수직이므로, 평면을 매개변수식으로 표현하면 다음과 같습니다.
+
+$$ (P-P_0) \dot N = 0 $$
 
 
 ### Ray-Sphere intersection
