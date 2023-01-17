@@ -136,35 +136,35 @@ scene.draw()
 `.add_camera()` 메서드는 `Figure 3`에서 정의한 카메라의 기본적인 속성들을 갖고 있습니다. 아직 `depth_limit`에 대해선 설명하지 않았는데, 이후에 하도록 하겠습니다.
 
 {% highlight python %}
-def add_camera(self,
-               camera_position,
-               camera_direction,
-               depth_limit = 3):
-    self.Co = np.array(camera_position)
-    self.Cd = normalize(np.array(camera_direction) - self.Co)
-    self.Cu = np.array([0,0,1])
-    self.Cr = normalize(np.cross(self.Cd, self.Cu))
-    self.hFOV = 75
-    self.depth = depth_limit
-    self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
-    self.pixel_h = self.pixel_w
+    def add_camera(self,
+                   camera_position,
+                   camera_direction,
+                   depth_limit = 3):
+        self.Co = np.array(camera_position)
+        self.Cd = normalize(np.array(camera_direction) - self.Co)
+        self.Cu = np.array([0,0,1])
+        self.Cr = normalize(np.cross(self.Cd, self.Cu))
+        self.hFOV = 75
+        self.depth = depth_limit
+        self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
+        self.pixel_h = self.pixel_w
 {% endhighlight %}
 
 우리는 `.render()` 메서드를 통해 `scene`에 추가된 카메라의 원점(`Co`)에서 출발하여 이미지의 픽셀 `(x,y)`를 향하는 광선의 방향 벡터 $ D $ 를 계산합니다.
 카메라의 렌즈가 향하는 방향(`Cd`)으로부터 변위 `(dx, dy)`를 계산하여 광선의 방향 벡터 $ D $를 결정한다고 이해하시면 되겠습니다. 
 
 {% highlight python %}
-def render(self):
-    for x in range(self.w):
-        for y in range(self.h):
-            dx = self.pixel_w * (x - self.w/2)
-            dy = - self.pixel_h * (y - self.h/2)
-
-            O = self.Co # Origin of ray
-            D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
-
-            color = self.trace(O, D)
-            self.image[y,x] = np.clip(color, 0, 1)
+    def render(self):
+        for x in range(self.w):
+            for y in range(self.h):
+                dx = self.pixel_w * (x - self.w/2)
+                dy = - self.pixel_h * (y - self.h/2)
+    
+                O = self.Co # Origin of ray
+                D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
+    
+                color = self.trace(O, D)
+                self.image[y,x] = np.clip(color, 0, 1)
 {% endhighlight %}
 
 이렇게 뻗어나간 광선은 시작점($O$)과 방향($D$)을 갖고 있습니다. 다음 섹션에서는 이제 `.trace()` 메서드를 통해 해당 광선이 어떤 물체에 충돌하였는지 계산해 보겠습니다.
@@ -175,24 +175,24 @@ def render(self):
 가장 가까이 있는 물체와 그 거리를 계산합니다. 만약 최소 거리(`min_distance`)가 `np.inf`일 경우 해당 광선이 어떤 물체와도 부딪히지 않는다고 볼 수 있습니다.
 
 {% highlight python %}
-def trace(self, ray_origin, ray_direction):
-    # Step 1: Find the closest object
-    min_distance = np.inf
-    closest_object = None
-    M = None # closest intersection point
-    for o, obj in enumerate(self.objects):
-        distance, intersection = self.intersection(ray_origin, ray_direction, obj)
-        if distance < min_distance:
-            min_distance = distance
-            closest_object = obj
-            M = intersection
-    if min_distance == np.inf: # no object
-        return np.zeros(3)
-
-    # Step 2: Get properties of the closest object
-    color = closest_object.color
-    # Step 3:
-    return color
+    def trace(self, ray_origin, ray_direction):
+        # Step 1: Find the closest object
+        min_distance = np.inf
+        closest_object = None
+        M = None # closest intersection point
+        for o, obj in enumerate(self.objects):
+            distance, intersection = self.intersection(ray_origin, ray_direction, obj)
+            if distance < min_distance:
+                min_distance = distance
+                closest_object = obj
+                M = intersection
+        if min_distance == np.inf: # no object
+            return np.zeros(3)
+    
+        # Step 2: Get properties of the closest object
+        color = closest_object.color
+        # Step 3:
+        return color
 {% endhighlight %}
 
 이렇게 각 광선이 처음으로 만나는 물체의 특징이 `scene`을 렌더링 할 때의 색을 결정합니다. 
@@ -233,21 +233,21 @@ $t$가 매우 큰 경우($ t > 10^4$), 우리는 광선이 평면을 지나지 �
 마찬가지로 $t$ 가 음수인 경우($ t < 0 $) 역시 광선이 반대 방향으로 날아가기 때문에 평면과 만나지 않는다고 볼 수 있습니다.
 
 {% highlight python %}
-def intersection(self, ray_origin, ray_direction, object):
-    if object.type == 'plane':
-        # Ray-Plane intersection
-        O = ray_origin
-        D = ray_direction
-        P0 = object.position
-        N = object.normal
-
-        t = np.dot((P0-O), N) / np.dot(D, N)
-        if t > 10e4 or t < 0:
-            distance = np.inf
-        else:
-            distance = t
-        intersection = O + distance*ray_direction
-        return distance, intersection
+    def intersection(self, ray_origin, ray_direction, object):
+        if object.type == 'plane':
+            # Ray-Plane intersection
+            O = ray_origin
+            D = ray_direction
+            P0 = object.position
+            N = object.normal
+    
+            t = np.dot((P0-O), N) / np.dot(D, N)
+            if t > 10e4 or t < 0:
+                distance = np.inf
+            else:
+                distance = t
+            intersection = O + distance*ray_direction
+            return distance, intersection
 {% endhighlight %}
 
 이렇게 광선과 평면의 공간 벡터를 이용하여 평면이 카메라 상에서 어떻게 보이는지 계산해 보았습니다. 
@@ -274,28 +274,28 @@ class Checkerboard():
 교차점(`intersection`)의 `xy` 좌표에 따라 `Checkerboard()` 클래스의 `.color` 속성을 흰색(`np.ones(3)`) 혹은 검정색(`np.zeros(3)`)으로 업데이트 해 줍니다.
 
 {% highlight python %}
-def intersection(self, ray_origin, ray_direction, object):
-    if object.type == 'plane' or object.type == 'checkerboard':
-        # Ray-Plane intersection
-        O = ray_origin
-        D = ray_direction
-        P = object.position
-        N = object.normal
-
-        distance = np.dot((P-O), N) / np.dot(D, N)
-        if distance > 10e4 or distance < 0:
-            distance = np.inf
-        intersection = O + distance*ray_direction
-
-        if object.type == 'checkerboard':
-            if distance != np.inf:
-                if np.floor(intersection[0]) % 2 == np.floor(intersection[1]) % 2:
-                    color = np.ones(3)
-                else:
-                    color = np.zeros(3)
-                object.colorize(color)
-
-        return distance, intersection
+    def intersection(self, ray_origin, ray_direction, object):
+        if object.type == 'plane' or object.type == 'checkerboard':
+            # Ray-Plane intersection
+            O = ray_origin
+            D = ray_direction
+            P = object.position
+            N = object.normal
+    
+            distance = np.dot((P-O), N) / np.dot(D, N)
+            if distance > 10e4 or distance < 0:
+                distance = np.inf
+            intersection = O + distance*ray_direction
+    
+            if object.type == 'checkerboard':
+                if distance != np.inf:
+                    if np.floor(intersection[0]) % 2 == np.floor(intersection[1]) % 2:
+                        color = np.ones(3)
+                    else:
+                        color = np.zeros(3)
+                    object.colorize(color)
+    
+            return distance, intersection
 {% endhighlight %}
 
 이제 Figure 4에서 그린 흰색 평면 대신 같은 위치에 `checkerboard` 객체를 생성하여 `scene`을 렌더링 합니다.
@@ -317,13 +317,26 @@ scene.draw()
 ### Ray-Sphere intersection
 
 평면 다음으로 구현해 볼 물체는 바로 구(Sphere) 입니다. 공간 상에서 구는 구의 중점($P_0$)과 반지름($R$)로 표현 됩니다.
-평면과 마찬가지로 구의 점들을 매개변수 방정식으로 표현 할 수 있습니다. 구에 속한 임의의 점($P$)은 구의 중점 $P_0$로부터 반지름 $R$ 만큼 떨어져 있으므로 다음 식을 만족합니다. 
+공간 상에서 구 객체를 생성하기 위한 `Sphere()` 클래스는 다음과 같습니다. 중점과 반지름에 대한 속성을 갖고 있습니다.
+
+{% highlight python %}
+class Sphere():
+    def __init__(self, position, radius, color):
+        self.type = 'sphere'
+        self.position = position
+        self.radius = radius
+        self.color = color
+{% endhighlight %}
+
+그렇다면 이러한 구 객체는 광선 벡터와 어떻게 상호작용 할까요? 
+우리는 평면과 마찬가지로 구의 점들을 매개변수 방정식으로 표현 할 수 있습니다. 
+구에 속한 임의의 점($P$)은 구의 중점 $P_0$로부터 반지름 $R$ 만큼 떨어져 있으므로 다음 식을 만족합니다. 
 
 $$ \lvert P-P_0 \rvert ^2 - R^2 = 0 $$
 
 만약 광선($O+tD$)가 구를 지난다면, 조건에 따라 다음과 같은 경우가 발생 할 수 있습니다. 
 광선은 구를 뚫고 지나가는 경우가 있을 수 있고, 이 경우엔 광선과 구 사이의 교차점은 2개가 발생합니다. 이를 각각 $I_1$과 $I_2$라 할 수 있습니다.
-광선이 구의 한 점에 겹치는 $I_1=I_2$인 경우와 광선이 구를 지나지 않는 경우가 있을 수 있습니다. 이 경우엔 교차점을 찾을 수 없습니다.
+광선이 구의 면을 정확하게 지나 하나의 교차점을 갖는 경우, 즉 $I_1=I_2$인 경우와 광선이 구를 지나지 않는 경우가 있을 수 있습니다. 이 경우엔 교차점을 찾을 수 없습니다.
 
 ![7](https://i.ibb.co/PNdrQvQ/7.png)
 
@@ -337,4 +350,56 @@ $$ \lvert O+tD -P_0 \rvert ^2 - R^2 = 0 $$
 
 $$  D^2 t^2 + 2D(O-P_0) t +  \lvert O-P_0 \rvert ^2 - R^2 = 0  $$
 
+해당 식을 자세히 보면 $t$에 대한 2차 방정식인 것을 볼 수 있습니다. 
+이 2차 방정식의 실수해에 따라 광선과 구의 관계가 결정 됩니다.
+두 개의 실수 해가 존재할 경우는 광선이 구를 뚫고 지나가 두 교차점 $I_1$과 $I_2$가 생기는 경우이며,
+하나의 실수해가 존재하는 경우 광선이 구의 면을 정확하게 지나 하나의 교차점을 갖는 경우, 마지막으로 해가 존재하지 않는 경우 광선은 구를 지나지 않습니다.
 
+2차 방정식을 푸는 방법은 잘 알고 계신 근의 공식을 이용하는 것 입니다. 
+이때 근의 공식 속 판별식(Discriminant)의 부호에 따라 실수해의 조건이 결정됩니다.
+매개변수 방정식의 실수해 $t$는 다음과 같습니다.
+
+$$ t=\frac{-b \pm \sqrt{b^2-4ac}}{2a} $$
+
+방정식의 다항계수 $a$, $b$, $c$는 각각 다음과 같습니다. 
+$$
+\begin{align}   
+a&=D^2    \\
+b&=2D(O-P_0)    \\
+c&=\lvert O-P_0 \rvert ^2 - R^2
+\end{align}
+$$
+
+{% highlight python %}
+        if object.type == 'sphere':
+             # Ray-Sphere intersection
+            O = ray_origin
+            D = ray_direction
+            P0 = object.position
+            R = object.radius
+
+            a = np.dot(D, D) # always 1
+            b = 2 * np.dot(D, O - P0)
+            c = np.dot(O - P0, O - P0) - R * R
+            discriminant = b * b - 4 * a * c
+            if discriminant > 0: # two roots
+                t1 = (-b + np.sqrt(discriminant)) / (2.0*a)
+                t2 = (-b - np.sqrt(discriminant)) / (2.0*a)
+
+                if t1 > 0 and t2 > 0:     # find closest intersection
+                    distance = np.min([t1, t2])
+                elif t1 <= 0 and t2 <= 0: # no intersection
+                    distance = np.inf
+                else:
+                    distance = np.max([t1, t2])
+
+            elif discriminant == 0: # one root
+                t = -b/(2*a)
+                distance = t
+
+            elif discriminant < 0: # no root
+                distance = np.inf
+
+            intersection = O + distance*ray_direction
+            return distance, intersection
+{% endhighlight %}
