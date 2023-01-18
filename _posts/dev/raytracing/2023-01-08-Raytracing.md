@@ -506,7 +506,8 @@ Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$�
 마지막으로 확산광과 반사광은 광원의 방향 $\hat{L}$, 물체의 노말 벡터 $\hat{N}$, 
 카메라의 방향 $\hat{V}$, 마지막으로 빛이 물체에 반사되어 나가는 반사각의 방향을 나타내는 반사 벡터 $\hat{R}$을 고려하여 크기가 결정 됩니다.
 시간을 들여 조금 생각해 보시면 왜 확산광의 크기가 $(\hat{L}_l \cdot \hat{N})$에 비례하는지, 
-반사광의 크기가 $(\hat{R}_l \cdot \hat{V})$에 의해 결정되는지 아실 수 있을 거라고 생각 합니다.
+반사광의 크기가 $(\hat{R}_l \cdot \hat{V})$에 의해 결정되는지 직관적으로 이해 하실 수 있을 거라고 생각 합니다.
+내적을 이루는 두 벡터가 수직인 경우 내적의 값이 0이 되는데, 광원에 비치는 물체 표면의 각도에 따라 우리 눈에 어떤 색으로 보일지 생각해 보시면 좋을것 같아요.
 
 여기까지 우리는 Phong 반사 모델에서 사용되는 세 요소를 수학적으로 정의해 보았습니다. 이제 프로그래밍을 구현을 할 차례... 인데요.
 최근에는 Phong 반사 모델을 사용하는 것 보다 NASA 제트추진연구소(JPL)의 컴퓨터 그래픽스 엔지니어 Jim Blinn이 이를 개선한 버전인 Blinn-Phong 반사 모델을 주로 사용합니다.
@@ -549,7 +550,11 @@ $ \frac{\hat{L}+\hat{V}}{\lvert \hat{L}+\hat{V} \rvert} $로 정의 됩니다.
             return normalize(intersection - object.position)
 {% endhighlight %}
 
-노말 벡터의 경우 평면은 어느 점에서나 고정된 값을 가지기 때문에 `Plane()`이나 `Checkerboard()` 클래스의 경우
+여러분들은 `.add_light()` 메서드를 수정하여 현실 세계에 있는 다양한 광원을 구현할 수 있습니다.
+빛이 강한 방향성을 갖고, 좁은 공간을 비추는 스팟라이트를 구현 해 볼 수도 있고, 점광원을 응용하여 면광원을 구성 할 수도 있습니다.
+여기서는 간단히 공간 상의 한 점(`Lo`)에서 흰색 빛이 방사형으로 퍼져 나가는 점광원을 구현해 보았습니다. 
+
+`.get_normal()` 메서드가 반환하는 노말 벡터의 경우 평면은 어느 점에서나 고정된 값을 가지기 때문에 `Plane()`이나 `Checkerboard()` 클래스의 경우
 `.normal` 속성을 반환해 주면 되지만, `Sphere()` 클래스로 생성되는 객체들은 구의 중심점으로부터 교차점을 향하는 방향 벡터가
 해당 물체의 노말 벡터가 됩니다. 이를 계산하여 반환해 줍시다.
 
@@ -633,7 +638,39 @@ class Sphere():
         return color
 {% endhighlight %}
 
+위 코드를 통해 우리가 위에서 수학적으로 정의한 Blinn-Phong 반사 모델을 그대로 구현해 보았습니다. 
+여러분들이 위에서 수학적인 개념이 어떻게 코드로 구현되는지 주목해 주시기 바랍니다.
+아직 그림자를 어떻게 구현하였는지 설명을 하지 않았는데요. 
+핵심은 교차점에서 광원을 향하는 방향 벡터 $\vec{N}$이 
+다른 물체에 가리는지 `.intersection()` 메서드를 호출하여 거리를 계산하고 분기를 통해 확인하면 됩니다. 
+
+이제 `scene`에 포함될 물체를 정의하고, `.add_light()` 메서드를 이용해 광원을 추가하고, `scene`을 렌더링 해 보겠습니다.
+각 물체의 물리적인 특성을 기술하기 위해 `diffuse_k`와 `specular_k` 속성을 추가하는 것에 주목해 주시기 바랍니다.
+광원의 위치는 원점으로부터 $z+5$ 좌표에 있는 점광원을 추가해 주었습니다.
+
+{% highlight python %}
+checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1), diffuse_k=1.0, specular_k=0.5)
+red_ball = Sphere(position=(0.0, 5, -1+0.8), radius=0.8, color=(1,0,0), diffuse_k=1.0, specular_k=1.0)
+blue_ball = Sphere(position=(1.0, 4, -1+0.5), radius=0.5, color=(0,0,1), diffuse_k=1.0, specular_k=1.0)
+
+scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball])
+scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
+scene.add_light(light_position=(0,0,5), light_color=(1,1,1))
+scene.render()
+scene.draw()
+{% endhighlight %}
+
 ![10](https://i.ibb.co/gVct0xv/10.png)
+
+결과를 보니 어떠신가요? 수학적으로 표현되는 빛을 모델링하니 현실적인 공간감이 느껴지는 3차원 `scene`을 렌더링 할 수 있었습니다.
+그렇게 구현했으니 결과가 이렇다고 하면 당연한 이야기지만, 
+그래도 자연 현상을 설명하는 모델을 컴퓨터로 직접 구현해서 현실적인 결과를 눈으로 확인하는 일은 늘 굉장한 성취감을 주는 순간이라 생각합니다.
+
+
+### 빛의 다중 반사
+
+
+
 
 
 
