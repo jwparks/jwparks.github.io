@@ -427,7 +427,7 @@ $$ \begin{aligned} a&=D^2  \\  b&=2D(O-P_0)  \\ c&=\lvert O-P_0 \rvert ^2 - R^2 
             return distance, intersection
 {% endhighlight %}
 
-이제 `Sphere()` 클래스를 이용하여 `scene` 상에 빨간색 구와 파란색 구를 추가해 보도록 하겠습니다.
+이제 `Sphere()` 클래스를 이용하여 `scene` 상에 빨간색, 초록색, 파란색 구를 추가해 보도록 하겠습니다.
 이전에 미리 정의해 둔 체커보드는 $z=-1$인 평면이므로, 해당 평면 위에 구를 올리기 위해
 각 구의 중심점(`position`)의 좌표를 $z=-1+r$로 정의해 주었습니다. 
 
@@ -435,8 +435,9 @@ $$ \begin{aligned} a&=D^2  \\  b&=2D(O-P_0)  \\ c&=\lvert O-P_0 \rvert ^2 - R^2 
 checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1))
 red_ball = Sphere(position=(0.0, 5, -1+0.8), radius=0.8, color=(1,0,0))
 blue_ball = Sphere(position=(1.0, 4, -1+0.5), radius=0.5, color=(0,0,1))
+green_ball = Sphere(position=(-1.0, 4.5, -1+0.3), radius=0.3, color=(0,1,0))
 
-scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball])
+scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball, green_ball])
 scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
 scene.render()
 scene.draw()
