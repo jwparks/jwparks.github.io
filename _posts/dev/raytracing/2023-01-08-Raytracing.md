@@ -240,6 +240,8 @@ $$ (P-P_0) \cdot N = 0 $$
 직선과 평면의 교차점을 $I$라고 할 때, I는 두 매개변수 방정식 $I=O+t_{I}D$와 $(I-P_0) \cdot N = 0$을 만족하게 됩니다.
 
 ![5](https://i.ibb.co/jWmwkbj/5.png)
+Figure 5. Ray-Plane intersection
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 직선이 평면에 포함되거나 평행하지 않을 때(즉, $D \cdot N \neq 0$), 이를 만족하는 $t$는 다음과 같습니다.
 
@@ -330,6 +332,9 @@ scene.draw()
 이제 더 다양한 물체를 구현하여 `scene`에 추가해 보도록 하겠습니다.
 
 ![6](https://i.ibb.co/D83KKV2/6.png)
+Figure 6. Ray-Plane intersection을 이용해 렌더링 된 체커보드 객체
+{: style="color:gray; font-size: 90%; text-align: center;"}
+
 
 ### Ray-Sphere intersection
 
@@ -356,6 +361,8 @@ $$ \lvert P-P_0 \rvert ^2 - R^2 = 0 $$
 광선이 구의 면을 정확하게 지나 하나의 교차점을 갖는 경우, 즉 $I_1=I_2$인 경우와 광선이 구를 지나지 않는 경우가 있을 수 있습니다. 이 경우엔 교차점을 찾을 수 없습니다.
 
 ![7](https://i.ibb.co/PNdrQvQ/7.png)
+Figure 7. Ray-Sphere intersection
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 오른쪽 그림에서 광선의 매개변수 $t$의 조건에 따라 교차점이 어떤 식으로 정의 되는지 볼 수 있습니다. 
 이제 매개변수 방정식을 풀어 실제 교차점 $I$의 좌표와 교차점 까지의 거리 $t$를 계산해 보겠습니다. 
@@ -439,6 +446,8 @@ scene.draw()
 위 코드를 통해 `scene`을 렌더링한 결과는 다음과 같습니다.
 
 ![8](https://i.ibb.co/NKmBmmJ/8.png)
+Figure 8. Ray-Sphere intersection을 이용한 구 객체의 렌더링
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 ## 조명 모델
 지금까지 우리는 3차원 공간을 구성하고, 공간에 있는 여러 물체를 수학적으로 정의하고, 
@@ -455,6 +464,8 @@ Phong 반사 모델은 최종적으로 렌더링된 물체의 색을 세 개의 
 사실 컴퓨터 그래픽스에서는 그냥 앰비언트, 디퓨즈, 스페큘러라고 부르는 것이 보통이지만, 저는 최대한 우리말을 써 보도록 하겠습니다.
 
 ![Phong](https://upload.wikimedia.org/wikipedia/commons/6/6b/Phong_components_version_4.png)
+Figure 9. Phong reflecion model을 이용하여 물체에 반사되는 다양한 빛을 고려 할 수 있다.
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 위 그림은 Phong 반사 모델의 세 요소를 도식화한 그림입니다. 
 보시는 것과 같이 물체의 최종 색을 결정하는 광량이 주변광(Ambient), 확산광(Diffuse), 그리고 반사광(Specular)의 합으로 결정되는 것을 볼 수 있습니다.
@@ -505,6 +516,8 @@ Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$�
 물체의 색은빛의 3원색인 빨간색, 초록색, 파란색에 의해 표현되므로 우리는 모든 $I$ 값을 `(R,G,B)` 벡터 형태로 계산합니다.
 
 ![9](https://i.ibb.co/L9zFLcY/9.png)
+Figure 10. Phong reflecion model에 작용하는 방향 벡터
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 마지막으로 확산광과 반사광은 광원의 방향 $\hat{L}$, 물체의 노말 벡터 $\hat{N}$, 
 카메라의 방향 $\hat{V}$, 마지막으로 빛이 물체에 반사되어 나가는 반사각의 방향을 나타내는 반사 벡터 $\hat{R}$을 고려하여 크기가 결정 됩니다.
@@ -668,6 +681,8 @@ scene.draw()
 {% endhighlight %}
 
 ![10](https://i.ibb.co/WtxD8x8/10.png)
+Figure 11. Blinn-Phong reflecion model을 적용한 렌더링
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 결과를 보니 어떠신가요? 수학적으로 표현되는 빛을 모델링하니 현실적인 공간감이 느껴지는 3차원 `scene`을 렌더링 할 수 있었습니다.
 그렇게 구현했으니 결과가 이렇다고 하면 당연한 이야기지만, 
@@ -763,6 +778,8 @@ scene.draw()
 {% endhighlight %}
 
 ![11](https://i.ibb.co/G7PCmsH/11.png)
+Figure 12. 빛의 다중 반사를 고려한 렌더링
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 결과에서 볼 수 있듯, 빛이 여러 물체에 반사되며 새로운 형태의 상을 만들고 더욱 현실적인 그래픽이라 느껴집니다.
 준비한 이번 주차의 내용은 여기서 끝입니다. 여기까지 따라오시느라 정말 고생하셨습니다.
