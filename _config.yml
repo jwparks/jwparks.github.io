@@ -1,6 +1,6 @@
 title: "A miserable failure"
 author: "Jiwoong Park"
-description: "Jiwoong Park, <b style=\"color: #f45;\"> in the haze </b>"
+description: "Jiwoong Park"  #"Jiwoong Park, <b style=\"color: #f45;\"> in the haze </b>"
 url                      : "https://jwparks.github.io" # 현재의 블로그 url 입니다.
 repository               : "https://github.com/jwparks/jwparks.github.io" # Github Repo url입니다.
 permalink: /:title/
