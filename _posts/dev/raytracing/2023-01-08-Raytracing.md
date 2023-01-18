@@ -765,8 +765,9 @@ scene.draw()
 ![11](https://i.ibb.co/G7PCmsH/11.png)
 
 결과에서 볼 수 있듯, 빛이 여러 물체에 반사되며 새로운 형태의 상을 만들고 더욱 현실적인 그래픽이라 느껴집니다.
-이번 주차의 내용은 여기서 끝입니다. 여러분들에게 주어지는 과제는 이 프로젝트를 따라서 마지막 최종 결과를 재현하는것 입니다.
-물론 여러분이 물체의 여러 물리적 특성과 위치를 바꾸어 가며 렌더링 해 보신다면 더욱 재미있는 과제가 될 것 같습니다.
+준비한 이번 주차의 내용은 여기서 끝입니다. 여기까지 따라오시느라 정말 고생하셨습니다.
+여러분들에게 주어지는 과제는 이 프로젝트를 따라서 마지막 최종 결과를 재현하는것 입니다.
+여러분들이 직접 물체의 여러 물리적 특성과 위치를 바꾸어 가며 렌더링 해 보시기를 권장합니다.
 결과를 재현하기 위한 모든 소스 코드는 이 프로젝트 페이지에 나와 있지만, 복사-붙여넣기 하여 실행 할 수 있는 전체 소스코드는 주어지지 않았습니다.
 과제를 수행하며 이 프로젝트에 사용된 여러 개념을 이해하고 적용하시는 연습을 하실 수 있기를 기대합니다.
 
@@ -785,9 +786,8 @@ scene.draw()
 
 
 
-
 ### Recommended reading
 - Bui Tuong Phong, Illumination for computer generated pictures, Communications of ACM 18 (1975)
 - Ray Tracing in One Weekend: https://raytracing.github.io
-- Project `python_ray_tracer` by lwanger: https://github.com/lwanger/python_ray_tracer
+- lwanger's `python_ray_tracer` project: https://github.com/lwanger/python_ray_tracer
 - Scratchapixel 3.0 : https://www.scratchapixel.com/index.html
