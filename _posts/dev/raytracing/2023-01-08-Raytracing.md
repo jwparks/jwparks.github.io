@@ -341,7 +341,7 @@ class Sphere():
         self.type = 'sphere'
         self.position = position
         self.radius = radius
-        self.color = color
+        self.color = np.array(color)
 {% endhighlight %}
 
 그렇다면 이러한 구 객체는 광선 벡터와 어떻게 상호작용 할까요? 
@@ -439,7 +439,7 @@ scene.draw()
 
 ![8](https://i.ibb.co/f0NdYRC/8.png)
 
-## 빛의 반사 모델
+## 조명 모델
 지금까지 우리는 3차원 공간을 구성하고, 공간에 있는 여러 물체를 수학적으로 정의하고, 
 각 물체들이 카메라를 통해 어떻게 보일지 광선과 물체 사이의 매개변수 방정식을 풀어 계산해 보았습니다. 
 여기까지 잘 따라오셨나요? 만약 아직 여기까지 구현하지 못했다면 잠시 읽기를 멈추고 차근차근 따라해 보시기 바랍니다.
@@ -479,7 +479,7 @@ Phong 반사 모델은 최종적으로 렌더링된 물체의 색을 세 개의 
 확산광은 물체 표면에서 일어나는 빛의 난반사에 의해 결정되는 색 표현 입니다. 
 이는 실제로 우리가 보게 되는 물체의 색을 대부분 결정하는 요소로,
 만약 물체가 거울과 같이 이상적으로 매끈하여 정반사만 일어난다면, 
-우리는 광원이 적절한 각도에 배치 될 때만 물체를 볼 수 있게 됩니다. (그것도 매우 눈이 부시겠지요! 🤩)
+우리는 광원이 적절한 각도에 배치 될 때만 물체를 볼 수 있게 됩니다. (그리고 매우 눈이 부시겠지요! 🤩)
 
 ### 반사광(Specular)
 마지막으로 반사광은 직접 조명이 물체의 표면에서 정반사되며 나타나는 색 표현 입니다.
@@ -494,14 +494,12 @@ Phong 반사 모델은 최종적으로 렌더링된 물체의 색을 세 개의 
 $$ I_p = k_{a}I_{a} + \sum_{l \in \text{lights}} (k_{d}(\hat{L}_l \cdot \hat{N})I_{l,d} + k_{s}(\hat{R}_l \cdot \hat{V})^\alpha I_{l,s}) $$
 
 이제 수식을 풀어서 설명해 보도록 하겠습니다. 
-Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$은 주변광 $k_{a}I_{a}$, 
-확산광 $ k_{d}(\hat{L}_l \cdot \hat{N})I_{l,d} $, 
-그리고 반사광 $ k_{s}(\hat{R}_l \cdot \hat{V})^\alpha I_{l,s} $의 합으로 결정 됩니다.
+Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$은 주변광 $k_{a}I_{a}$, 확산광 $ k_{d} (\hat{L}_l \cdot \hat{N})I_{l,d} $, 그리고 반사광 $ k_{s} (\hat{R}_l \cdot \hat{V})^\alpha I_{l,s} $의 합으로 결정 됩니다.
 빛의 위치에 따라 결정되는 확산광과 반사광의 경우 `scene`에 광원 $l$이 여러개 있을 수 있어 $\Sigma$ 항을 통해 이를 모두 더해주는 모습입니다.
 
 각 항의 계수 $k_a$, $k_d$, $k_s$는 0부터 1사이의 값으로 각각 주변광, 확산광, 반사광의 상대적인 크기를 결정합니다.
 각 항에 곱해지는 $I_a$, $I_d$, $I_s$는 각각 주변광, 확산광, 반사광으로부터 발현되는 색을 결정합니다. 
-즉 물체의 `RGB` 색을 계산하기 위해서 이 값은 `RGB` 벡터 형태로 주어집니다.
+물체의 색은빛의 3원색인 빨간색, 초록색, 파란색에 의해 표현되므로 우리는 모든 $I$ 값을 `(R,G,B)` 벡터 형태로 계산합니다.
 
 ![9](https://i.ibb.co/L9zFLcY/9.png)
 
@@ -511,14 +509,132 @@ Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$�
 반사광의 크기가 $(\hat{R}_l \cdot \hat{V})$에 의해 결정되는지 아실 수 있을 거라고 생각 합니다.
 
 여기까지 우리는 Phong 반사 모델에서 사용되는 세 요소를 수학적으로 정의해 보았습니다. 이제 프로그래밍을 구현을 할 차례... 인데요.
-사실 최근에는 Phong 반사 모델을 바로 사용하는 것 보다 Jim Blinn이 이를 살짝 개량한 Blinn-Phong 반사 모델을 사용합니다.
-이는 반사 벡터 $\hat{R}$을 계산하는 것이 다소 비효율적이기 때문인데요, 
+최근에는 Phong 반사 모델을 사용하는 것 보다 NASA 제트추진연구소(JPL)의 컴퓨터 그래픽스 엔지니어 Jim Blinn이 이를 개선한 버전인 Blinn-Phong 반사 모델을 주로 사용합니다.
+이는 매번 반사 벡터 $\hat{R}$을 계산하는 것이 다소 비효율적이기 때문인데요.
 우리는 반사광의 크기를 결정하는 반사 벡터 $\hat{R}$과 카메라의 방향 벡터 $\hat{V}$의 내적 $(\hat{R}_l \cdot \hat{V})$을
 노말 벡터 $\hat{N}$과 하프 벡터 $\hat{H}$의 내적인 $(\hat{N} \cdot \hat{H})$로 대체 할 수 있습니다.
 하프 벡터 $\hat{H}$는 광원의 방향 벡터 $\hat{L}$와 카메라의 방향 벡터 $\hat{V}$의 중간 방향을 가리키는 벡터인
 $ \frac{\hat{L}+\hat{V}}{\lvert \hat{L}+\hat{V} \rvert} $로 정의 됩니다.
 
 ### Blinn-Phong 반사 모델의 구현
+
+이제 우리는 수학적으로 정의된 Blinn-Phong 반사 모델을 파이썬을 통해 구현합니다. 
+물체에 비춰지는 확산광과 반사광을 구현하기 위해 우리는 광원과 
+빛이 물체에 반사될때 교차점(`intersection`)의 노말 벡터 $N$이 필요합니다. 
+`Scene()` 클래스에 광원을 추가하는 `.add_light()` 메서드와 
+노말 벡터를 반환하는 `.get_normal()` 메서드를 추가해 줍니다. 
+또한 각각 주변광과 반사광의 크기를 결정하는 계수 $k_a$와 지수 $\alpha$를 컨스트럭터에 추가합니다.
+
+{% highlight python %}
+    def __init__(self,
+                 width,
+                 height,
+                 objects):
+        self.w = np.array(width)
+        self.h = np.array(height)
+        self.ratio = width / height
+        self.objects = objects
+        self.image = np.zeros((height, width, 3))
+        self.ka = 0.05
+        self.alpha = 30
+        
+    def add_light(self, light_position, light_color = (1,1,1)):
+        self.Lo = np.array(light_position)
+        self.Lc = np.array(light_color)
+    
+    def get_normal(self, intersection, object):
+        if object.type == 'plane' or object.type == 'checkerboard':
+            return object.normal
+        elif object.type == 'sphere':
+            return normalize(intersection - object.position)
+{% endhighlight %}
+
+노말 벡터의 경우 평면은 어느 점에서나 고정된 값을 가지기 때문에 `Plane()`이나 `Checkerboard()` 클래스의 경우
+`.normal` 속성을 반환해 주면 되지만, `Sphere()` 클래스로 생성되는 객체들은 구의 중심점으로부터 교차점을 향하는 방향 벡터가
+해당 물체의 노말 벡터가 됩니다. 이를 계산하여 반환해 줍시다.
+
+다음으로 우리가 구현한 `Plane()`, `Checkerboard()`, `Sphere()` 클래스에 
+각각 확산광과 반사광의 크기를 결정하는 계수 $k_d$와 $k_s$를 속성으로 명시합니다.
+
+{% highlight python %}
+class Plane():
+    def __init__(self, position, normal, color, diffuse_k, specular_k):
+        self.type = 'plane'
+        self.position = np.array(position)
+        self.normal = normalize(np.array(normal))
+        self.color = np.array(color)
+        self.kd = diffuse_k
+        self.ks = specular_k
+
+class Checkerboard():
+    def __init__(self, position, normal, diffuse_k, specular_k):
+        self.type = 'checkerboard'
+        self.position = np.array(position)
+        self.normal = normalize(np.array(normal))
+        self.kd = diffuse_k
+        self.ks = specular_k
+
+    def colorize(self, color):
+        self.color = color
+
+class Sphere():
+    def __init__(self, position, radius, color, diffuse_k, specular_k):
+        self.type = 'sphere'
+        self.position = position
+        self.radius = radius
+        self.color = np.array(color)
+        self.kd = diffuse_k
+        self.ks = specular_k
+{% endhighlight %}
+
+이제 `Scene()` 클래스에서 광선 벡터의 궤적을 추적하는 `.trace()` 메서드 내에서 그림자와 Blinn-Phong 반사 모델을 구현합니다.
+
+{% highlight python %}
+    def trace(self, ray_origin, ray_direction):
+        # Step 1: Find the closest object
+        min_distance = np.inf
+        closest_object = None
+        closest_object_idx = None
+        closest_intersection = None # closest intersection point
+        for o, obj in enumerate(self.objects):
+            distance, intersection = self.intersection(ray_origin, ray_direction, obj)
+            if distance < min_distance:
+                min_distance = distance
+                closest_object = obj
+                closest_object_idx = o
+                closest_intersection = intersection
+        if min_distance == np.inf: # no object
+            return np.zeros(3)
+
+        # Step 2: Get properties of the closest object
+        ambient_color = closest_object.color
+        diffuse_color = closest_object.color
+        specular_color = self.Lc
+        N = self.get_normal(closest_intersection, closest_object)
+        L = normalize(self.Lo - closest_intersection)
+        V = normalize(ray_origin - closest_intersection)
+        H = normalize(L + V)
+
+        # Step 3: Find if the intersection point is shadowed or not.
+        distance_to_other_objects = []
+        for o, obj in enumerate(self.objects):
+            if o != closest_object_idx:
+                distance, _ = self.intersection(closest_intersection + N * .0001,
+                                                L,
+                                                obj)
+                distance_to_other_objects.append(distance)
+
+        # Step 4: Apply Blinn-Phong reflection model
+        color = self.ka * ambient_color   # add ambient
+        if np.min(distance_to_other_objects) < np.inf: # intersection point is shadowed
+            return color
+        color += closest_object.kd * max(np.dot(N, L), 0) * diffuse_color  # add diffuse
+        color += closest_object.ks * max(np.dot(N, H), 0) ** self.alpha * specular_color  # add specular
+        return color
+{% endhighlight %}
+
+![10](https://i.ibb.co/gVct0xv/10.png)
+
 
 
 
