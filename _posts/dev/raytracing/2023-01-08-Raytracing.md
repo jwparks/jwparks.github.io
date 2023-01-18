@@ -4,9 +4,9 @@ mathjax: true
 layout: post
 categories: Dev
 ---
-2023년도 겨울학기 과학계산 트레이닝 세션의 두번째 주제는 컴퓨터를 이용해 빛을 추적하는 기법인 **Ray tracing** 입니다. 
+2023년도 겨울학기 과학계산 트레이닝 세션의 두번째 주제는 컴퓨터를 이용해 빛을 추적하여 장면을 렌더링하는 기법인 **Ray tracing** 입니다. 
 이번 주제는 첫 주차 주제보다 수학적인 요소도 많고, 이를 컴퓨터를 이용하여 구현하는 것도 조금 더 어려운데요. 
-대신 그만큼 더 재미있는 주제라고 생각 합니다. 
+대신 그만큼 더 재미있고 배우는 것이 많은 주제라고 생각합니다.
 이번 주차를 수행하며 여러분은 실제로 현대 컴퓨터 그래픽스에서 널리 쓰이는 렌더링 방법중 하나인 레이트레이싱을 파이썬을 이용해 직접 구현하게 됩니다.
 이를 구현하는 과정에서 여러분은 공간 벡터의 개념과 구현 및 응용 그리고 객체지향 프로그래밍을 연습 할 수 있습니다.  과제 수행에 필요한 모든 소스 코드는 설명과 함께 주어지지만, 
 전체 소스 코드가 제공되지 않기 때문에 여러분들은 주어진 설명을 이해하고, 논리 흐름에 맞게 전체 소스 코드를 완성하셔야 합니다.
@@ -161,7 +161,7 @@ scene.draw()
         self.Cu = np.array([0,0,1])
         self.Cr = normalize(np.cross(self.Cd, self.Cu))
         self.hFOV = 75
-        self.depth = depth_limit
+        self.depth_limit = depth_limit
         self.pixel_w = 2*np.tan(np.radians(self.hFOV/2)) / self.w
         self.pixel_h = self.pixel_w
 {% endhighlight %}
@@ -437,7 +437,7 @@ scene.draw()
 
 위 코드를 통해 `scene`을 렌더링한 결과는 다음과 같습니다.
 
-![8](https://i.ibb.co/f0NdYRC/8.png)
+![8](https://i.ibb.co/NKmBmmJ/8.png)
 
 ## 조명 모델
 지금까지 우리는 3차원 공간을 구성하고, 공간에 있는 여러 물체를 수학적으로 정의하고, 
@@ -453,7 +453,7 @@ scene.draw()
 Phong 반사 모델은 최종적으로 렌더링된 물체의 색을 세 개의 요소로 나누어 설명합니다. 각각 주변광(Ambient), 확산광(Diffuse), 반사광(Specular) 입니다.
 사실 컴퓨터 그래픽스에서는 그냥 앰비언트, 디퓨즈, 스페큘러라고 부르는 것이 보통이지만, 저는 최대한 우리말을 써 보도록 하겠습니다.
 
-![9](https://upload.wikimedia.org/wikipedia/commons/6/6b/Phong_components_version_4.png)
+![Phong](https://upload.wikimedia.org/wikipedia/commons/6/6b/Phong_components_version_4.png)
 
 위 그림은 Phong 반사 모델의 세 요소를 도식화한 그림입니다. 
 보시는 것과 같이 물체의 최종 색을 결정하는 광량이 주변광(Ambient), 확산광(Diffuse), 그리고 반사광(Specular)의 합으로 결정되는 것을 볼 수 있습니다.
@@ -494,7 +494,9 @@ Phong 반사 모델은 최종적으로 렌더링된 물체의 색을 세 개의 
 $$ I_p = k_{a}I_{a} + \sum_{l \in \text{lights}} (k_{d}(\hat{L}_l \cdot \hat{N})I_{l,d} + k_{s}(\hat{R}_l \cdot \hat{V})^\alpha I_{l,s}) $$
 
 이제 수식을 풀어서 설명해 보도록 하겠습니다.
-Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$은 첫번째 항인 주변광($k_{a}I_{a}$), 두번째 항인 확산광($k_{d}(\hat{L}_l \cdot \hat{N})I_{l,d}$), 그리고 마지막 항인 반사광($k_{s} (\hat{R}_l \cdot \hat{V})^\alpha I_{l,s}$)의 합으로 결정 됩니다.
+Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$은 첫번째 항인 주변광($k_{a}I_{a}$), 
+두번째 항인 확산광($(\hat{L}_l \cdot \hat{N})$), 
+그리고 마지막 항인 반사광($(\hat{R}_l \cdot \hat{V})^\alpha$)의 합으로 결정 됩니다.
 빛의 위치에 따라 결정되는 확산광과 반사광의 경우 `scene`에 광원 $l$이 여러개 있을 수 있어 $\Sigma$ 항을 통해 이를 모두 더해주는 모습입니다.
 
 각 항의 계수 $k_a$, $k_d$, $k_s$는 0부터 1사이의 값으로 각각 주변광, 확산광, 반사광의 상대적인 크기를 결정합니다.
@@ -628,13 +630,16 @@ class Sphere():
                                                 L,
                                                 obj)
                 distance_to_other_objects.append(distance)
+        if np.min(distance_to_other_objects) < np.inf: # intersection point is shadowed
+            return np.zeros(3)
 
         # Step 4: Apply Blinn-Phong reflection model
-        color = self.ka * ambient_color   # add ambient
-        if np.min(distance_to_other_objects) < np.inf: # intersection point is shadowed
-            return color
-        color += closest_object.kd * max(np.dot(N, L), 0) * diffuse_color  # add diffuse
-        color += closest_object.ks * max(np.dot(N, H), 0) ** self.alpha * specular_color  # add specular
+        # add ambient
+        color = self.ka * ambient_color
+        # add diffuse
+        color += closest_object.kd * max(np.dot(N, L), 0) * diffuse_color  
+        # add specular
+        color += closest_object.ks * max(np.dot(N, H), 0) ** self.alpha * specular_color
         return color
 {% endhighlight %}
 
@@ -652,15 +657,16 @@ class Sphere():
 checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1), diffuse_k=1.0, specular_k=0.5)
 red_ball = Sphere(position=(0.0, 5, -1+0.8), radius=0.8, color=(1,0,0), diffuse_k=1.0, specular_k=1.0)
 blue_ball = Sphere(position=(1.0, 4, -1+0.5), radius=0.5, color=(0,0,1), diffuse_k=1.0, specular_k=1.0)
+green_ball = Sphere(position=(-1.0, 4.5, -1+0.3), radius=0.3, color=(0,1,0), diffuse_k=1.0, specular_k=1.0)
 
-scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball])
+scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball, green_ball])
 scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0))
 scene.add_light(light_position=(0,0,5), light_color=(1,1,1))
 scene.render()
 scene.draw()
 {% endhighlight %}
 
-![10](https://i.ibb.co/gVct0xv/10.png)
+![10](https://i.ibb.co/WtxD8x8/10.png)
 
 결과를 보니 어떠신가요? 수학적으로 표현되는 빛을 모델링하니 현실적인 공간감이 느껴지는 3차원 `scene`을 렌더링 할 수 있었습니다.
 그렇게 구현했으니 결과가 이렇다고 하면 당연한 이야기지만, 
@@ -669,13 +675,118 @@ scene.draw()
 
 ## 빛의 다중 반사
 
+여기까지 잘 따라오셨나요? 정말 고생하셨습니다. 하지만 벌써 끝이라면 너무 아쉬운 일이겠죠? 😃
+더욱 현실적인 레이트레이싱 기반의 렌더링을 위해 우리가 추가적으로 고려해야 하는 점은 빛의 다중 반사입니다.
+우리 눈으로 들어오는 빛은 광원에서 출발하여 여러 물체에 반사되어 눈으로 들어오게 됩니다.
+어릴적 거울 두개를 마주보고 가운데 물건을 놓아 보신 적이 있으신가요? 
+물체에 반사된 빛은 두 거울 사이에서 무한히 반사되어 여러개의 상을 만들게 됩니다.
+거울은 빛의 반사율이 대단이 높은 물질이기 때문에 선명한 상을 만들지만,
+반사율이 낮은 물질, 예를들어 저녁에 컴퓨터를 할 때 모니터에 비치는 여러분의 얼굴은 그렇게까지 선명하게 보이진 않죠.
+그 빛은 모니터에 나와, 여러분의 얼굴에서 반사되고, 다시 모니터에 반사되어, 다시 여러분의 눈에 들어오게 됩니다.
+즉 빛이 두번 반사된 것을 알 수 있습니다!
+
+여러분의 눈으로 들어와 현실 세계를 렌더링하는 그래픽카드, 즉 광자는 현대 컴퓨터 하드웨어가 도저히 범접할 수 없는 성능을 가지고 있어 
+거의 무한히 반사되는 상도 실시간으로 렌더링 할 수 있습니다. 
+반면 우리가 레이트레이싱을 통해 두 거울 사이에서 무한히 반사되는 물체를 렌더링 하고자 한다면, 
+아무리 컴퓨터 하드웨어가 좋다고 하더라도 그야말로 무한한 시간이 걸리게 될 것입니다.
+
+그래서 우리는 빛이 반사되는 최대 횟수(`depth_limit`)를 제한하여 빛의 다중 반사를 고려해 보겠습니다. 
+여기선 최대 반사 횟수를 3으로 제한하고 있지만, 여러분들은 다양한 숫자로 바꾸어 테스트 해 보시기 바랍니다.
+단, `depth_limit`을 지나치게 높은 값으로 설정하는 경우 말씀 드렸다 시피 엄청난 연산 시간을 필요로 합니다.
+
+빛의 다중 반사를 고려할 때의 핵심은 광선과 물체의 교차점(`intersection`)에서 
+입사된 광선의 입사각과 같은 반사각으로 다시 발사된다는 점입니다.
+반사각의 방향 벡터 $R$은 이전 조명 모델에서 설명한 대로 $2(\hat{L} \cdot \hat{N})\hat{N}-\hat{L}$로 계산 됩니다.
+이 경우엔 방향이 반대기 때문에 새롭게 발사되는 광선은 교차점 $I$에서 방향 $-R$로 나아갑니다.
+반복문을 이용해 이를 연속적으로 계산하여 빛의 다중 반사를 계산 할 수 있습니다.
+
+그렇다면 다중 반사에 의한 물체의 색은 어떻게 결정이 될까요? 
+이는 빛의 세기와 색을 곱한 값이 누적해서 더해지는 식으로 구현 할 수 있습니다. 
+물론 빛의 세기는 반사를 거듭하며 물체의 반사율에 따라 점점 감소하게 됩니다. 
+반사율이 0.5인 물체에 두번 반사되면 빛의 세기는 0.25가 되는 것이지요.
+
+이제 `.render()` 메서드를 수정하여 빛의 다중 반사를 구현합니다. 
+코드를 보시면 `.trace()` 메서드를 호출하여 조명 모델을 통해 계산된 물체의 색(`color`) 이외에도 
+반사된 물체(`object`)와 교차점(`intersection`), 노말 벡터(`N`) 등이 함께 반환되는 것을 볼 수 있습니다.
+그렇게 동작하도록 `.trace()` 메서드의 `return` 부분을 수정해 보시면 되겠습니다. 
+또한 빛의 세기를 나타내는 `intensity`가 물체의 반사율 속성(`object.r`)에 따라 지속적으로 감소되는 점을 볼 수 있습니다.
+글이 너무 길어져서 따로 쓰지는 않겠지만, 물체를 생성하는 클래스에 반사율 속성(`.r`)을 명시해 주시면 되겠습니다.
+
+마지막으로 새롭게 캐스팅되는 광선의 원점(`O`)과 방향(`D`)이 교차점과 노말 벡터를 통해 새롭게 계산되는 점을 확인 할 수 있습니다.
+방향 벡터는 설명한 것과 같이 $-R$인 것을 볼 수 있지만,
+새로운 광선의 원점(`O`)은 교차점(`intersection`)이 아니라 
+교차점으로부터 노말 벡터를 따라 아주 살짝 떨어진 지점, 즉 `intersection + N * 0.001`인 것을 볼 수 있는데요.
+혹시 이유를 아시겠나요? 아까 설명하진 않았지만 그림자를 구현 할 때도 같은 트릭을 이용하였습니다.
+
+{% highlight python %}
+    def render(self):
+        for x in range(self.w):
+            for y in range(self.h):
+                dx = self.pixel_w * (x - self.w/2)
+                dy = - self.pixel_h * (y - self.h/2)
+
+                O = self.Co # Origin of ray
+                D = normalize(self.Cd + dx*self.Cr + dy*self.Cu) # Direction of ray
+
+                depth = 0
+                intensity = 1.0
+                base_color = np.zeros(3)
+                while depth < self.depth_limit:
+                    traced = self.trace(O, D)
+                    if len(traced) < 4:
+                        break
+                    color, object, intersection, N = traced
+
+                    O = intersection + N * .0001
+                    D = normalize(D - 2 * np.dot(D, N) * N) # -R
+                    base_color += intensity * color
+                    intensity *= object.r
+                    depth += 1
+                self.image[y,x] = np.clip(base_color, 0, 1)
+
+{% endhighlight %}
+
+이제 반사율 속성을 가진 물체를 `scene`에 넣고 다시 렌더링 해 봅시다. 물체에 따라 반사율과 반사광 계수 $k_s$를 조절하였습니다.
+
+{% highlight python %}
+checkerboard = Checkerboard(position=(0,0,-1), normal=(0,0,1), diffuse_k=1.0, specular_k=0.5, reflection=0.6)
+red_ball = Sphere(position=(0.0, 5, -1+0.8), radius=0.8, color=(1,0,0), diffuse_k=1.0, specular_k=1.0, reflection=0.8)
+blue_ball = Sphere(position=(1.0, 4, -1+0.5), radius=0.5, color=(0,0,1), diffuse_k=1.0, specular_k=0.4, reflection=0.4)
+green_ball = Sphere(position=(-1.0, 4.5, -1+0.3), radius=0.3, color=(0,1,0), diffuse_k=1.0, specular_k=0.2, reflection=0.2)
+
+scene = Scene(width=1920, height=1080, objects=[checkerboard, red_ball, blue_ball, green_ball])
+scene.add_camera(camera_position=(0,0,0), camera_direction=(0,1,0), depth_limit=3)
+scene.add_light(light_position=(0,0,5), light_color=(1,1,1))
+scene.render()
+scene.draw()
+{% endhighlight %}
+
+![11](https://i.ibb.co/G7PCmsH/11.png)
+
+결과에서 볼 수 있듯, 빛이 여러 물체에 반사되며 새로운 형태의 상을 만들고 더욱 현실적인 그래픽이라 느껴집니다.
+이번 주차의 내용은 여기서 끝입니다. 여러분들에게 주어지는 과제는 이 프로젝트를 따라서 마지막 최종 결과를 재현하는것 입니다.
+물론 여러분이 물체의 여러 물리적 특성과 위치를 바꾸어 가며 렌더링 해 보신다면 더욱 재미있는 과제가 될 것 같습니다.
+결과를 재현하기 위한 모든 소스 코드는 이 프로젝트 페이지에 나와 있지만, 복사-붙여넣기 하여 실행 할 수 있는 전체 소스코드는 주어지지 않았습니다.
+과제를 수행하며 이 프로젝트에 사용된 여러 개념을 이해하고 적용하시는 연습을 하실 수 있기를 기대합니다.
+
+아래 도전 문제는 학습 목표 달성 등급인 `A` 평가를 받는데 영향을 주지 않지만, 
+이번 주차 과제의 `A+`는 도전 과제를 성공적으로 구현하신 분에게 드리도록 하겠습니다. 
+
+## 도전 문제: Ray-Box interaction을 이용하여 정육면체 구현하기
+
+여러분은 이제 이 프로젝트를 응용하여 다양한 물체를 정의해 볼 수 있습니다. 
+예를 들어 거울 역할을 하는 객체를 만들기 위해 반사율이 대단히 높은 평면을 `scene`에 추가 해 볼 수 있고,
+투명한 물체를 추가하기 위해 빛의 굴절(refraction)을 고려해 볼 수도 있습니다.
+이번 주차의 도전 문제는 지금까지 배운 지식을 이용하여 `scene`에 정육면체를 추가하는 것 입니다.
+정육면체는 노말 벡터가 고정이기 때문에 평면과 유사한 특징을 갖지만 
+제한된 크기를 가졌기 때문에 광선에 의한 교차점을 갖는 조건을 찾는 것이 상당히 까다롭습니다.
+"Ray-Box interaction"으로 검색 하시면 다양한 참고 문헌이 있으니 이를 참고하셔서 구현해 보시면 되겠습니다.
 
 
 
 
-
-
-
-
-
-
+### Recommended reading
+- Bui Tuong Phong, Illumination for computer generated pictures, Communications of ACM 18 (1975)
+- Ray Tracing in One Weekend: https://raytracing.github.io
+- Project `python_ray_tracer` by lwanger: https://github.com/lwanger/python_ray_tracer
+- Scratchapixel 3.0 : https://www.scratchapixel.com/index.html
