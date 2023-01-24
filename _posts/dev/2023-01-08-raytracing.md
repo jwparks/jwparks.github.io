@@ -132,6 +132,13 @@ class Plane():
         self.color = np.array(color)
 {% endhighlight %}
 
+위에서 사용되는 전역 함수 `normalize()`는 주어진 벡터를 유닛 벡터로 변환하는 함수로 다음과 같이 정의해 주었습니다. 
+
+{% highlight python %}
+def normalize(vector):
+    return vector / np.linalg.norm(vector)
+{% endhighlight %}
+
 이제 `Plane()` 클래스를 이용하여 점 $P=(0,0,-1)$을 지나고, $\hat{z}$ 방향에 수직(즉, 노말 벡터가 $N=(0,0,1)$)인 흰색 평면을 만들어 보겠습니다.
 만들어진 흰색 평면 `white_plane`을 `1920×1080` 해상도의 `Scene`에 넣고, `Scene`을 렌더링 하기 위한 시점(카메라)을 정의합니다.
 카메라는 공간상에서 원점($C_0=(0,0,0)$)에 존재하고, $\hat{y}$ 축을 바라보고($C_d=(0,1,0)$) 있습니다.  
@@ -183,7 +190,17 @@ scene.draw()
                 self.image[y,x] = np.clip(color, 0, 1)
 {% endhighlight %}
 
-이렇게 뻗어나간 광선은 시작점($O$)과 방향($D$)을 갖고 있습니다. 다음 섹션에서는 이제 `.trace()` 메서드를 통해 해당 광선이 어떤 물체에 충돌하였는지 계산해 보겠습니다.
+이렇게 뻗어나간 광선은 시작점($O$)과 방향($D$)을 갖고 있습니다. 
+마지막으로 이렇게 모든 색을 다 채워넣은 `.image`를 `.draw()` 메서드를 이용해 시각화 합니다.
+
+{% highlight python %}
+    def draw(self, dpi=300):
+        plt.figure(dpi=dpi)
+        plt.imshow(self.image)
+        plt.show()
+{% endhighlight %}
+
+다음 섹션에서는 이제 `.trace()` 메서드를 통해 해당 광선이 어떤 물체에 충돌하였는지 계산해 보겠습니다.
 
 ## 광선 벡터와 물체의 상호작용
 먼저 우리는 카메라의 중심점 $O$로부터 방향 $D$를 갖고 뻗어나가는 각 광선이 처음으로 만나는 물체가 무엇인지 추적해야 합니다. 
