@@ -41,7 +41,7 @@ categories: Dev
 실시간 렌더링을 필요로 하는 비디오 게임 등에서도 제한적으로 레이트레이싱 기법이 활용되고 있습니다. 
 아마 컴퓨터를 잘 모르시는 분들도 그래픽카드 모델명이 RTX3070이다, RTX4080이다 이런 말들을 들어 보셨을 텐데요, 이렇게 RTX 이름을 달고 있는 그래픽카드들이 바로 RT 코어를 내장하고 있는 그래픽카드들 입니다.
 
-![1](https://i.ibb.co/m6cnhDy/Control-RTX-Comparison-6.jpg)
+[![Control-RTX-Comparison-6.jpg](https://i.postimg.cc/vBhFCPQ6/Control-RTX-Comparison-6.jpg)](https://postimg.cc/wy1GmQR6)
 Figure 1. Control(2019)에서 구현된 실시간 레이트레이싱  
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -57,7 +57,7 @@ Figure 1. Control(2019)에서 구현된 실시간 레이트레이싱
 2D 이미지를 렌더링 한다는 의미는, 이미지를 구성하는 픽셀들의 색을 "적절히" 칠한다는 것을 의미합니다. 
 그리고 우리는 각 픽셀들의 색이 그 픽셀로 들어온 광선으로부터 정의될 것이라는 사실을 알고 있습니다.
 
-![2](https://i.ibb.co/nBbSDkp/1.png)
+[![1.png](https://i.postimg.cc/mDyBBLSk/1.png)](https://postimg.cc/R6hjTzyx)
 Figure 2. 레이트레이싱을 이용한 이미지 렌더링
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -93,7 +93,7 @@ class Scene():
 카메라의 위치 $\vec{C_0}(x,y,z)$와 방향 $\vec{C_d}(x,y,z)$, 카메라의 시야각($ \text{FOV}(\theta) $)이 정해지면 각 픽셀을 통과하는 광선들의 공간 벡터의 방향을 계산 할 수 있습니다. 
 물론 카메라는 렌즈를 통과하는 회전축을 중심으로 회전(`roll`)이 가능한데, 이 경우는 카메라의 위쪽이 항상 $\hat{z}(0,0,1)$ 방향을 향한다고 가정하여 카메라의 `roll` 방향 회전은 고려하지 않겠습니다.
 
-![3](https://i.ibb.co/XsWVXV5/2.png)
+[![2.png](https://i.postimg.cc/xThDrNSg/2.png)](https://postimg.cc/nC4wBzrQ)
 Figure 3. 이미지의 각 픽셀을 통과하는 광선 벡터의 방향 계산
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -107,7 +107,7 @@ Figure 3. 이미지의 각 픽셀을 통과하는 광선 벡터의 방향 계산
 어디에도 부딪히지 않고 텅 빈 공간으로 날아가는 빛에 해당하는 픽셀 ($P_2$)는 도달한 빛이 없으므로 검은 색을 가지게 될 것입니다. 
 이제 실제로 이 사고 실험을 그대로 컴퓨터 프로그래밍을 통해 구현해 보겠습니다. 결과는 다음과 같습니다.
 
-![4](https://i.ibb.co/whHDrDx/3.png)
+[![3.png](https://i.postimg.cc/3x5SCXhM/3.png)](https://postimg.cc/dL6jJTDn)
 Figure 4. 레이트레이싱을 통해 렌더링한 평면
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -255,7 +255,7 @@ $$ (P-P_0) \cdot N = 0 $$
 직선 $O+tD$와 평면 $ (P-P_0) \cdot N = 0 $ 사이의 관계를 그림으로 나타내면 다음과 같습니다.
 직선과 평면의 교차점을 $I$라고 할 때, I는 두 매개변수 방정식 $I=O+t_{I}D$와 $(I-P_0) \cdot N = 0$을 만족하게 됩니다.
 
-![5](https://i.ibb.co/jWmwkbj/5.png)
+[![5.png](https://i.postimg.cc/8kFgZm2s/5.png)](https://postimg.cc/MX8LTVK8)
 Figure 5. Ray-Plane intersection
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -347,7 +347,7 @@ scene.draw()
 결과는 다음과 같습니다. 어떤가요? 실제로 카메라를 통해 공간 상에 위치한 평면을 렌더링 했다는 것이 잘 느껴지시죠? 
 이제 더 다양한 물체를 구현하여 `scene`에 추가해 보도록 하겠습니다.
 
-![6](https://i.ibb.co/D83KKV2/6.png)
+[![6.png](https://i.postimg.cc/zDH4CXhg/6.png)](https://postimg.cc/hhgCgnpD)
 Figure 6. Ray-Plane intersection을 이용해 렌더링 된 체커보드 객체
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -376,7 +376,7 @@ $$ \lvert P-P_0 \rvert ^2 - R^2 = 0 $$
 광선은 구를 뚫고 지나가는 경우가 있을 수 있고, 이 경우엔 광선과 구 사이의 교차점은 2개가 발생합니다. 이를 각각 $I_1$과 $I_2$라 할 수 있습니다.
 광선이 구의 면을 정확하게 지나 하나의 교차점을 갖는 경우, 즉 $I_1=I_2$인 경우와 광선이 구를 지나지 않는 경우가 있을 수 있습니다. 이 경우엔 교차점을 찾을 수 없습니다.
 
-![7](https://i.ibb.co/PNdrQvQ/7.png)
+[![7.png](https://i.postimg.cc/8zN3gR0R/7.png)](https://postimg.cc/7ftXg2Dh)
 Figure 7. Ray-Sphere intersection
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -462,7 +462,7 @@ scene.draw()
 
 위 코드를 통해 `scene`을 렌더링한 결과는 다음과 같습니다.
 
-![8](https://i.ibb.co/NKmBmmJ/8.png)
+[![8.png](https://i.postimg.cc/KYYHRZF4/8.png)](https://postimg.cc/cvVmzGvN)
 Figure 8. Ray-Sphere intersection을 이용한 구 객체의 렌더링
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -532,7 +532,7 @@ Phong 반사 모델을 이용해 계산 되는 물체의 최종적인 색 $I_p$�
 각 항에 곱해지는 $I_a$, $I_d$, $I_s$는 각각 주변광, 확산광, 반사광으로부터 발현되는 색을 결정합니다. 
 물체의 색은빛의 3원색인 빨간색, 초록색, 파란색에 의해 표현되므로 우리는 모든 $I$ 값을 `(R,G,B)` 벡터 형태로 계산합니다.
 
-![9](https://i.ibb.co/L9zFLcY/9.png)
+[![9.png](https://i.postimg.cc/cCfDVC7k/9.png)](https://postimg.cc/ct4M3sbf)
 Figure 10. Phong reflecion model에 작용하는 방향 벡터
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -698,7 +698,7 @@ scene.render()
 scene.draw()
 {% endhighlight %}
 
-![10](https://i.ibb.co/WtxD8x8/10.png)
+[![10.png](https://i.postimg.cc/Zq9xG04P/10.png)](https://postimg.cc/NycXTsyL)
 Figure 11. Blinn-Phong reflecion model을 적용한 렌더링
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
@@ -795,7 +795,7 @@ scene.render()
 scene.draw()
 {% endhighlight %}
 
-![11](https://i.ibb.co/G7PCmsH/11.png)
+[![11.png](https://i.postimg.cc/GhcJcXbm/11.png)](https://postimg.cc/BtV1pc8r)
 Figure 12. 빛의 다중 반사를 고려한 렌더링
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
