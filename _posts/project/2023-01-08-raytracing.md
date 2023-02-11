@@ -1,8 +1,8 @@
 ---
-title:  "레이트레이싱: 빛과 그래픽스"
+title:  "빛과 컴퓨터 그래픽스"
 mathjax: true
 layout: post
-categories: Dev
+categories: Project
 ---
 2023년도 겨울학기 과학계산 트레이닝 세션의 두번째 주제는 컴퓨터를 이용해 빛을 추적하여 장면을 렌더링하는 기법인 **Ray tracing** 입니다. 
 이번 주제는 첫 주차 주제보다 수학적인 요소도 많고, 이를 컴퓨터를 이용하여 구현하는 것도 조금 더 어려운데요. 

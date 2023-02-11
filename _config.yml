@@ -7,7 +7,7 @@ permalink: /:title/
 lang: "en"
 excerpt_separator: "\n\n\n"
 date_format: "%B %d, %Y"
-category_list: [Log, Dev]
+category_list: [Log, Project]
 
 # Layout
 
@@ -22,7 +22,7 @@ mathjax: true
 navigation:                # accepts {file, title, url, favicon.ico, sidebaricon}
   - {file: "about.md"}
   - {file: "log.html"}
-  - {file: "dev.html"}
+  - {file: "project.html"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
   - {title: Mail, icon: envelope, url: "mailto:haze@haze.kr"}
