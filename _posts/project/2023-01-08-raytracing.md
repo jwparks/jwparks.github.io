@@ -1,5 +1,5 @@
 ---
-title:  "빛과 컴퓨터 그래픽스"
+title:  "레이트레이싱과 컴퓨터 그래픽스"
 mathjax: true
 layout: post
 categories: Project
