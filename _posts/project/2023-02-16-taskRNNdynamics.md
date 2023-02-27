@@ -65,9 +65,9 @@ Xiao-Jing Wang 그룹에서 출판된 다양한 논문에서 공통적으로 제
 여러 논문들을 살펴 본 결과 각 논문들이 초점을 맞추고 있는 제약 조건은 조금씩 다르지만 공통적으로 사용하는 몇 가지 제약 조건을 발견하였습니다.
 다만 역시 위에서 말씀 드린 대로 모델 시스템을 정의하고 추상화하는데엔 정답이 없고, 연구자에 따라 서로 다른 방법을 사용하고 있다는 점을 꼭 염두해 두셨으면 좋겠습니다.
 
-1**RNN 모델의 neural activity를 양수(positive value)로 제한합니다.** 이는 실제 동물 뇌의 신경세포의 발화율이 음수로 표현되지 않기 때문입니다.
-2**RNN 모델의 recurrent unit이 가질 수 있는 neural activity의 크기를 정규화합니다.** 이는 RNN 모델이 지나치게 많은 계산 자원을 사용하지 못하도록 제약 조건을 거는 것으로, 실제 동물 뇌의 신경 활동은 에너지를 소모하여 일어나기 때문에 합리적인 제약 조건이라고 말할 수 있겠습니다.
-3**RNN 모델의 network weight가 희박한(sparse) 연결 구조를 갖게끔 제한합니다.** 이는 실제 동물 뇌의 신경세포에서 관찰되는 synaptic connection은 신경세포 사이의 물리적인 거리에 의한 제약 조건이 존재하고, 따라서 fully-connected 되어있지 않기 때문입니다. [포유류의 대뇌 피질에서 관찰되는 synaptic connection의 비율은 약 12% 라는 선행 연구](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.0030068)가 존재하고, 우리는 이 비율에 근사하도록 인공신경망에게 제약 조건을 걸 수 있습니다.
+1. **RNN 모델의 neural activity를 양수(positive value)로 제한합니다.** 이는 실제 동물 뇌의 신경세포의 발화율이 음수로 표현되지 않기 때문입니다.
+2. **RNN 모델의 recurrent unit이 가질 수 있는 neural activity의 크기를 정규화합니다.** 이는 RNN 모델이 지나치게 많은 계산 자원을 사용하지 못하도록 제약 조건을 거는 것으로, 실제 동물 뇌의 신경 활동은 에너지를 소모하여 일어나기 때문에 합리적인 제약 조건이라고 말할 수 있겠습니다.
+3. **RNN 모델의 network weight가 희박한(sparse) 연결 구조를 갖게끔 제한합니다.** 이는 실제 동물 뇌의 신경세포에서 관찰되는 synaptic connection은 신경세포 사이의 물리적인 거리에 의한 제약 조건이 존재하고, 따라서 fully-connected 되어있지 않기 때문입니다. [포유류의 대뇌 피질에서 관찰되는 synaptic connection의 비율은 약 12% 라는 선행 연구](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.0030068)가 존재하고, 우리는 이 비율에 근사하도록 인공신경망에게 제약 조건을 걸 수 있습니다.
 
 이외에도 여러 전기생리학 연구에서 측정된 대뇌 피질의 신경 세포의 특징에 기반한 다양한 제약 조건을 생각 해 볼 수 있겠습니다.
 그리고 그런 제약 조건 하에서 정의된 인공신경망 모델의 state dynamics와 행동 데이터가 어떻게 실제 뇌의 neuronal dynamics와 mental state를 더 잘 반영하는 모델 시스템인지 연구하는 것도 계산신경과학의 주요한 연구 방향이 아닐까 싶습니다.
@@ -84,7 +84,8 @@ $ -\mathbf{r}(t) $ 항의 경우 미분방정식에서 Leaky integration이라 �
 
 $$  
 \begin{align}
-    \mathbf{r}(t+\Delta t) = \mathbf{r}(t) + \Delta \mathbf{r} &= \mathbf{r}(t) + \frac{\Delta t}{\tau}[-\mathbf{r}(t) + f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r)] \\
+    \mathbf{r}(t+\Delta t) \approx \mathbf{r}(t) + \Delta \mathbf{r} &= \mathbf{r}(t) + \frac{\Delta t}{\tau}[-\mathbf{r}(t) + f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r)] \\
     &= (1 - \frac{\Delta t}{\tau})\mathbf{r}(t) + \frac{\Delta t}{\tau}f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r)
 \end{align}
 $$
+
