@@ -71,7 +71,8 @@ Xiao-Jing Wang 그룹에서 출판된 다양한 논문에서 공통적으로 제
 
 이외에도 여러 전기생리학 연구에서 측정된 대뇌 피질의 신경 세포의 특징에 기반한 다양한 제약 조건을 생각 해 볼 수 있겠습니다.
 그리고 그런 제약 조건 하에서 정의된 인공신경망 모델의 state dynamics와 행동 데이터가 어떻게 실제 뇌의 neuronal dynamics와 mental state를 더 잘 반영하는 모델 시스템인지 연구하는 것도 계산신경과학의 주요한 연구 방향이 아닐까 싶습니다.
-이제 위 세 가지 제약 조건을 건 Continous-time RNN(CTRNN) 모델을 구현해 보겠습니다. 먼저 RNN 모델의 single-unit의 recurrent neural activity $\mathbf{r}(t)$을 시간에 대한 미분방정식으로 표현하면 다음과 같습니다.
+이제 위 세 가지 제약 조건을 건 Continous-time RNN(CTRNN) 모델을 구현해 보겠습니다.
+먼저 RNN 모델의 single-unit의 recurrent neural activity $\mathbf{r}(t)$을 시간에 대한 미분방정식으로 표현하면 다음과 같습니다.
 
 $$ \tau \frac{d\mathbf{r}}{dt} = -\mathbf{r}(t) + f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r) $$
 
@@ -83,9 +84,157 @@ $ -\mathbf{r}(t) $ 항의 경우 미분방정식에서 Leaky integration이라 �
 이 부분을 구현하기 위하여 위 논문과 Guangyu Robert Yang의 [튜토리얼](https://github.com/gyyang/nn-brain/blob/master/RNN_tutorial.ipynb)을 참고하였습니다.
 
 $$  
-\begin{align}
+\begin{aligned}
     \mathbf{r}(t+\Delta t) \approx \mathbf{r}(t) + \Delta \mathbf{r} &= \mathbf{r}(t) + \frac{\Delta t}{\tau}[-\mathbf{r}(t) + f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r)] \\
     &= (1 - \frac{\Delta t}{\tau})\mathbf{r}(t) + \frac{\Delta t}{\tau}f(W_r \mathbf{r}(t) + W_x \mathbf{x}(t) + \mathbf{b}_r)
-\end{align}
+\end{aligned}
 $$
+
+## RNN 모델의 구현과 학습
+
+이제 이렇게 이산화 된 RNN 모델을 `PyTorch`를 이용하여 구현해 보겠습니다.
+RNN 모델의 neural activity를 positive value로 제한한다는 1번 제약 조건을 걸기 위해 모델에서 사용되는 활성화 함수 $f(\cdot)$는
+렐루 함수(Rectified Linear Unit, ReLU)를 사용해 보도록 하겠습니다. 
+
+{% highlight python %}
+class RNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, dt):
+        super().__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
+        self.dt = dt
+        self.tau = 100
+
+        self.i2h = nn.Linear(input_dim, hidden_dim)
+        self.h2h = nn.Linear(hidden_dim, hidden_dim)
+        self.h2o = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        hidden = torch.zeros(x.size(0), x.size(1), self.hidden_dim)
+        output = torch.zeros(x.size(0), x.size(1), self.output_dim)
+
+        h = torch.zeros(x.size(0), self.hidden_dim).to(device)
+        for t in range(x.size(1)):
+            h = h * (1 - self.dt/self.tau) + (self.dt/se
+            output[:,t,:] = o
+        return output, hidden
+{% endhighlight %}
+
+위 코드를 보시면 입력 텐서를 hidden layer로 넘겨주는 Linear transformation `.i2h()`와
+시간 $t$에서의 hidden state 텐서를 시간 $t+1$에서의 hidden state 텐서로 변환하는 `.h2h()`,
+마지막으로 hidden state 텐서를 출력 텐서로 변환하기 위한 `.h2o()` 선형 변환을 정의해 주었습니다.
+이후 모델이 실제로 정보를 다음 time step으로 넘겨주는 recurrent neural activity는
+위 미분방정식을 오일러법으로 근사한 수식을 `.forward()` 메서드에 직접 구현해 주었습니다.
+위 수식에서 시간 상수 $\tau$는 선행 연구에 따라 100ms로 설정하였고,
+$\mathbf{b}_r$항의 경우 선형 변환에 이미 포함 되어 있기 때문에 따로 구현해 줄 필요가 없다는 점을 주의하시기 바랍니다.
+이제 마찬가지로 RNN 모델의 학습과 테스트에 사용되는 시각 판별 과제를 생성하는 `VisualDiscrimination()` 클래스를 수정하여 
+미소 시간 변수 `.dt`에 따라 다운샘플링을 하도록 수정합니다. 대부분 저번 주차에서 했던 코드와 크게 다르지 않으며 샘플링 구간을 나타내는 변수 `.dt` 만 추가가 되었습니다.
+
+{% highlight python %}
+class VisualDiscrimination(Dataset):
+    def __init__(self, task_dict):
+        self.target_dim = task_dict['target_dim'] # Red and Green
+        self.color_dim = task_dict['color_dim']
+        self.output_dim = task_dict['output_dim'] # Left and Right
+        self.dt = task_dict['dt']
+        self.target_onset_range = task_dict['target_onset_range']
+        self.decision_onset_range = task_dict['decision_onset_range']
+        self.coherence_range = task_dict['coherence_range']
+        self.trial_length = task_dict['trial_length']
+        assert np.max(self.decision_onset_range) < self.trial_length
+
+        self.trial_steps = int(self.trial_length/self.dt)
+
+    def __getitem__(self, idx):
+        target_onset = int(np.random.randint(self.target_onset_range[0], self.target_onset_range[1])/self.dt)
+        decision_onset = int(np.random.randint(self.decision_onset_range[0], self.decision_onset_range[1])/self.dt)
+        coherence = np.random.uniform(low=self.coherence_range[0], high=self.coherence_range[1])
+
+        input_seq = np.zeros((self.trial_steps, self.target_dim+self.color_dim))
+        output_seq = np.zeros((self.trial_steps, self.output_dim))
+        checkerboard_color = np.sign(np.random.normal())          # -1(Red) or +1(Green)
+        target_idx = np.random.randint(0, self.output_dim)      # 0(Red-Green) or 1(Green-Red)
+
+        # Target cue
+        input_seq[target_onset:, target_idx] = 1
+
+        # Color checkerboard
+        input_seq[:, self.target_dim:] = np.random.normal(loc=0, size=(self.trial_steps, self.color_dim))
+        input_seq[decision_onset:, self.target_dim:] = np.random.normal(loc=checkerboard_color*coherence,
+                                                                       size=(self.trial_steps-decision_onset, self.color_dim))
+
+        # Desired output
+        color_idx = 1 if checkerboard_color > 0 else 0         # (0: Red, 1: Green)
+        output_direction = 0 if color_idx == target_idx else 1  # (0: Left, 1: Right)
+
+        output_seq[decision_onset:, output_direction] = 1
+
+        return {'input_seq': input_seq, 'output_seq': output_seq,
+                'checkerboard_color': checkerboard_color, 'coherence': coherence,
+                'target_idx': target_idx, 'output_direction': output_direction, 'decision_onset': decision_onset}
+{% endhighlight %}
+
+
+이제 
+
+{% highlight python %}
+task_params = {'target_dim': 2,
+               'color_dim': 10,
+               'output_dim': 2,
+               'dt': 20,
+               'target_onset_range': (400, 900),
+               'decision_onset_range': (1200, 1800),
+               'trial_length': 2000,
+               'coherence_range': (0.0, 1.0)}
+
+input_dim = task_params['target_dim']+task_params['color_dim']
+trial_steps = int(task_params['trial_length']/ task_params['dt'])
+hidden_dim = 128
+output_dim = task_params['output_dim']
+dt = task_params['dt']
+batch_size = 128
+num_epochs = 4000
+learning_rate = 0.001
+beta_rate = 10e-7
+beta_weight = 10e-5
+
+model = RNN(input_dim, hidden_dim, output_dim, dt).to(device)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+loss_history = []
+L1_rate_history = []
+L1_weight_history = []
+
+dataset = VisualDiscrimination(task_params)
+for epoch in range(num_epochs):
+    inputs = torch.zeros((batch_size, trial_steps, input_dim))
+    targets = torch.zeros((batch_size, trial_steps, output_dim))
+    for i in range(batch_size):
+        data = dataset[0]
+        inputs[i], targets[i] = torch.tensor(data['input_seq']), torch.tensor(data['output_seq'])
+    inputs.to(device)
+    targets.to(device)
+
+    optimizer.zero_grad()
+    outputs, hidden_state = model(inputs)
+    loss = criterion(outputs, targets)
+
+    L1_rate = beta_rate * torch.norm(hidden_state, 1)
+    model_weight = torch.cat([x.view(-1) for x in model.parameters()])
+    L1_weight = beta_weight * torch.norm(model_weight, 1)
+    total_loss = loss + L1_rate + L1_weight
+    total_loss.backward()
+    optimizer.step()
+    loss_history.append(loss.item())
+    L1_rate_history.append(L1_rate.item())
+    L1_weight_history.append(L1_weight.item())
+
+    if epoch % 100 == 0:
+        print (f'Training epoch ({epoch+1}/{num_epochs}), Total loss: {total_loss.item():3.3f}, '
+               f'loss: {loss.item():3.3f}, L1 norm(rate): {L1_rate:3.3f}, L1 norm(weight): {L1_weight:3.3f}')
+{% endhighlight %}
+
+![Screen-Shot-2023-03-01-at-6-18-21-PM.png](https://i.postimg.cc/5N5MKZkn/Screen-Shot-2023-03-01-at-6-18-21-PM.png)
+
 
