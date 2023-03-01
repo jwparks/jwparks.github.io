@@ -255,6 +255,15 @@ Figure 2. 제약 조건이 추가된 RNN 모델의 학습 곡선
 우리가 정의한 문제의 경우 그렇게 복잡하지 않아 어떤 제약조건 하에서라도 모델은 쉽게 문제를 풀 수 있지만,
 만약 RNN 모델이 여러 인지 과제를 동시에 수행해야 하는 경우 이러한 기법을 통해 더 효율적인 구조를 갖추는 것이 성능에 영향을 주게 됩니다. 
 
+![](https://i.postimg.cc/9fDLcgfd/Screen-Shot-2023-03-02-at-12-12-12-AM.png)
+Figure 3. Weight의 L1 정규화의 유무에 의한 RNN 모델의 network weight matrix 비교
+{: style="color:gray; font-size: 90%; text-align: center;"}
+
+그림 3에서 볼 수 있듯 똑같은 과제를 수행하는 두 RNN 모델의 network weight가 어떻게 구성되었는지 확인 할 수 있습니다.
+network weight의 L1 정규화가 적용된 RNN 모델(오른쪽)은 매우 희소한 network connection을 가지고 있음을 볼 수 있습니다.  저 많은 neuron 중에 일 하는 neuron의 수는 극소수군요...
+물론 희소한 network connection을 RNN 모델(오른쪽)이 살짝 더 낮은 model performance를 보이나, 큰 차이라고 볼 수 없고,
+connection의 개수 대비 model performance는 훨씬 더 뛰어나기 때문에 효율적인 연결 구조를 가지게 되었다고 말 할 수 있겠습니다.
+
 ## RNN 모델의 state dynamics 분석
 이제 학습된 RNN 모델의 recurrent neural activity $\mathbf{r}(t)$이 인지 과제를 수행하는 동안 어떤 dynamics를 가지고 있는지 살펴보겠습니다.
 먼저 쉽게 해 볼 수 있는 분석은 시각 판별 과제의 조건에 따라 RNN 모델의 neural trajectory가 어떤지 확인하는 것 입니다.
@@ -304,7 +313,7 @@ PCA 분석을 통해 저차원에 임베딩한 RNN model의 neural trajectory는
 1600ms에서 주어지는 checkerboard는 색을 판별하는 것은 각 시행의 color coherence 값에 따라 난이도가 달라지게 됩니다. 
 
 ![](https://i.postimg.cc/7hjSRqq6/Screen-Shot-2023-03-01-at-6-18-09-PM.png)
-Figure 3. color coherence에 따른 RNN 모델의 neural trajectory
+Figure 4. color coherence에 따른 RNN 모델의 neural trajectory
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
 RNN 모델의 neural trajectory를 보면 color coherence가 높은 시행에서 각각의 조건과 분기에 맞추어 neural state가 선명하게 나누어 지는 것을 볼 수 있습니다.
@@ -339,7 +348,7 @@ $\mathbf{J}$는 함수 $\mathbf{F}$의 Jacobian matrix로 함수 $\mathbf{F}$의
 이를 손으로 풀어서 analytic solution을 얻을 수 있으면 좋겠으나, 신경망을 이용한 시스템이 대부분 그러하듯 우리는 $\mathbf{F}(\mathbf{r}) = 0$인 analytic solution을 찾을 수 없을 것입니다.
 다시 말해 $\mathbf{F}(\mathbf{r})$가 최소가 되는 상태 $\mathbf{r}$을 수치 해석과 최적화를 이용해 찾아야 하는 것입니다.
 
-$$ \operatorname*{arg\,max}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
+$$ \operatorname*{arg\,max}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})} $$
 
 그럼 이건 또 어떻게 찾을 수 있을까요(ㅋㅋ)? 여기엔 여러 방법이 있겠습니다만, 결국 수치 해석과 최적화가 하는 일은 다 똑같습니다...
 목표 함수를 정의하고, 목표 함수를 최소(혹은 최대)로 하는 최적화를 수행 합니다. 저는 `PyTorch`의 자동 미분을 이용하여 경사 하강법(gradient descent)을 사용해 보겠습니다.
@@ -387,20 +396,26 @@ for target_idx in [0, 1]:
 {% endhighlight %}
 
 ![](https://i.postimg.cc/FsZLcbLz/Screen-Shot-2023-03-01-at-6-20-21-PM.png)
-Figure 4. Vector field of the state dynamics (왼쪽), Fixed point의 위치와 state trajectory (오른쪽)
+Figure 5. Vector field of the state dynamics (왼쪽), Fixed point의 위치와 state trajectory (오른쪽)
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
 State transition의 방향을 나타내는 vector field와 state trajectory를 저차원에 그리기 위해 위에서 학습한 PCA 모델을 이용하였습니다.
 먼저 네 조건(두 개의 타겟 조건과 두 개의 색 조건, color coherence는 모두 0.95로 설정)이 각각 
 어떤 state로 수렴하는지 확인하기 위해 state transition을 vector field로 나타내 보았습니다. 
-그림 4의 왼쪽 vector field를 보면 각 조건에 해당하는 자극이 주어질 때 네트워크의 상태가 대략 4개의 클러스터로 수렴하는 양상을 볼 수 있습니다.
+그림 5의 왼쪽 vector field를 보면 각 조건에 해당하는 자극이 주어질 때 네트워크의 상태가 대략 4개의 클러스터로 수렴하는 양상을 볼 수 있습니다.
 Left(Green) - Right(Red) 타겟에서 빨간색 checkerboard가 주어 질 때의 시행에서 최종적으로 상태가 수렴 되는 fixed points를 오른쪽 그림에 나타내었습니다.
 이처럼 RNN 모델을 dynamical system으로 해석하여 실제로 상태 공간 상에서 일어나는 state dynamics를 정량적으로 분석 해 볼 수 있었습니다.
 ㅎㅎ 사실 이외에도 계산된 jacobian $\mathbf{J}$을 분석하여 더 재미있는 결론을 찾아 볼 수도 있을 것 같은데, 이는 여러분에게 맡기도록 하겠습니다.
-재미있는 
 
 ## 마치며
-손목 아작남
+또 뭐 글을 거의 2주를 넘게 썼네요. 평소에 공부해 보면 좋을 것 같다고 생각한 주제였는데, 또 해보니 이런 접근 방법의 문제점을 금방 알 것 같기도 합니다.
+생각보다 RNN 모델의 dynamics를 분석 하는 것이 (여러 선행 연구의 예제만큼) 쉽고 간단하지는 않네요.
+의외로 잘 수렴하지 않는 부분도 있고... 문제가 너무 간단해서인지 RNN 모델이 넓은 state space를 충분히 잘 활용하지 못한다는 느낌을 받았습니다.
+오늘은 수식이 참 많았는데, 사실 수식이 뭐가 중요한가 싶기도 합니다. 제가 사실 이런 연구 주제를 볼 때마다 늘 하는 생각인데... 
+신경망을 이용한 연구에서는 analytic solution을 구하지 못하고, 결국 수치해석을 이용한 근사인데,
+풀지도 못하는 방정식을 애써 적어가는 것이 무슨 의미인가... 싶기도 하네요. 그래도 물론 연구자로서 잘 알고 있으려고 노력하고 있긴 합니다.
+아무튼 제 바람은 이 글을 보시는 여러분들이 수식과 함께 이를 실제로 코드를 통해 어떻게 구현하는지를 더 주의깊게 생각해 보셨으면 좋겠습니다.
+
 
 ### Recommended reading
 - Chandrasekaran, C., Peixoto, D., Newsome, W. T. & Shenoy, K. V. Laminar differences in decision-related neural activity in dorsal premotor cortex. Nat Commun 8, 614 (2017).
