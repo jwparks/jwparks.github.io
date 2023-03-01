@@ -304,6 +304,8 @@ PCA 분석을 통해 저차원에 임베딩한 RNN model의 neural trajectory는
 1600ms에서 주어지는 checkerboard는 색을 판별하는 것은 각 시행의 color coherence 값에 따라 난이도가 달라지게 됩니다. 
 
 ![](https://i.postimg.cc/7hjSRqq6/Screen-Shot-2023-03-01-at-6-18-09-PM.png)
+Figure 3. color coherence에 따른 RNN 모델의 neural trajectory
+{: style="color:gray; font-size: 90%; text-align: center;"}
 
 RNN 모델의 neural trajectory를 보면 color coherence가 높은 시행에서 각각의 조건과 분기에 맞추어 neural state가 선명하게 나누어 지는 것을 볼 수 있습니다.
 즉 모델은 800ms에서 해당 시행의 타겟 정보에 따라 state가 분리되고 이어서 1600ms에서 checkerboard의 색 정보가 주어질 때 서로 다른 response를 낼 수 있는 형태로 
@@ -326,21 +328,23 @@ $$ \frac{d\mathbf{r}}{dt} = \mathbf{F}(\mathbf{r}) $$
 시간 $t$에서 neural state $\mathbf{r}$는 상태 공간(state space)의 한 점으로 생각 할 수 있습니다.
 그 점은 다음 time step인 $t+1$에서 새로운 점(새로운 상태)으로 이동합니다. 즉 함수 $\mathbf{F}(\mathbf{r})$의 의미는 state $\mathbf{r}$을 시간으로 미분한, 즉 그 상태의 이동 속도라고 생각 할 수 있습니다.
 Fixed point는 이러한 상태의 이동 속도 $\mathbf{F}(\mathbf{r})$가 0이 되는 시점이라 생각 할 수 있습니다.
-이러한 Fixed point $\mathbf{r}_x$ 근방의 state인 $\mathbf{r}_x + \Delta \mathbf{r}$의 dynamics는 다음과 같이 선형 근사가 가능합니다.
+이러한 Fixed point $\mathbf{r}_F$ 근방의 state인 $\mathbf{r}_F + \Delta \mathbf{r}$의 dynamics는 다음과 같이 선형 근사가 가능합니다.
 
-$$ \mathbf{F}(\mathbf{r}) = \mathbf{F}(\mathbf{r}_x + \Delta \mathbf{r}) \approx \mathbf{F}(\mathbf{r}_x) + \mathbf{J}(\mathbf{r}_x)\Delta \mathbf{r} $$
+$$ \mathbf{F}(\mathbf{r}) = \mathbf{F}(\mathbf{r}_F + \Delta \mathbf{r}) \approx \mathbf{F}(\mathbf{r}_F) + \mathbf{J}(\mathbf{r}_F)\Delta \mathbf{r} $$
 
 $\mathbf{J}$는 함수 $\mathbf{F}$의 Jacobian matrix로 함수 $\mathbf{F}$의 1차 편미분 계수로 구성되어 있습니다. 이의 기하학적 의미 역시도 미소 영역에서 비선형 변환의 선형 근사를 의미합니다. 
 혹시 이에 대해 더 궁금하다면 관련 [학습 자료](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/jacobian-prerequisite-knowledge)를 추천합니다.
 
-그럼 이제 fixed point에서 우리는 RNN의 비선형 동역학을 선형 근사 할 수 있음을 알았으니 $\mathbf{F}(\mathbf{r}) = 0$인 $\mathbf{r}_x$를 찾아보면 되겠습니다.
+그럼 이제 fixed point에서 우리는 RNN의 비선형 동역학을 선형 근사 할 수 있음을 알았으니 $\mathbf{F}(\mathbf{r}) = 0$인 $\mathbf{r}_F$를 찾아보면 되겠습니다.
 이를 손으로 풀어서 analytic solution을 얻을 수 있으면 좋겠으나, 신경망을 이용한 시스템이 대부분 그러하듯 우리는 $\mathbf{F}(\mathbf{r}) = 0$인 analytic solution을 찾을 수 없을 것입니다.
 다시 말해 $\mathbf{F}(\mathbf{r})$가 최소가 되는 상태 $\mathbf{r}$을 수치 해석과 최적화를 이용해 찾아야 하는 것입니다.
 
 $$ \text{argmin}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
 
-그럼 이건 또 어떻게 
-
+그럼 이건 또 어떻게 찾을 수 있을까요(ㅋㅋ)? 여기엔 여러 방법이 있겠습니다만, 결국 수치 해석과 최적화가 하는 일은 다 똑같습니다...
+목표 함수를 정의하고, 목표 함수를 최소(혹은 최대)로 하는 최적화를 수행 합니다. 저는 `PyTorch`의 자동 미분을 이용하여 경사 하강법(gradient descent)을 사용해 보겠습니다.
+목표 함수는 RNN 모델의 hidden state `h`와 다음 time step에서의 state인 `h_new` 사이의 크기인 `h_diff`가 최소가 되는 방향으로 `h`의 그래디언트를 계산하여 하강(?)해 줍니다.
+이때 RNN 모델의 hidden state `h`는 시작 값을 임의의 값으로 초기화하여 넓은 상태 공간(state space)를 탐색해 보도록 하겠습니다.
 
 {% highlight python %}
 from torch.autograd import Variable
@@ -382,8 +386,11 @@ for target_idx in [0, 1]:
                 fixed_points[-1].append(fixed_point.detach().cpu().numpy())
 {% endhighlight %}
 
-
 ![](https://i.postimg.cc/FsZLcbLz/Screen-Shot-2023-03-01-at-6-20-21-PM.png)
+Figure 4. Vector field of the state dynamics (왼쪽), Fixed point의 위치와 state trajectory (오른쪽)
+{: style="color:gray; font-size: 90%; text-align: center;"}
+
+
 
 ## 마치며
 손목 아작남
