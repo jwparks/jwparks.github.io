@@ -127,7 +127,7 @@ class RNN(nn.Module):
 이후 모델이 실제로 정보를 다음 time step으로 넘겨주는 recurrent neural activity는
 위 미분방정식을 오일러법으로 근사한 수식을 `.forward()` 메서드에 직접 구현해 주었습니다.
 위 수식에서 시간 상수 $\tau$는 선행 연구에 따라 100ms로 설정하였고,
-$\mathbf{b}_r$항의 경우 선형 변환에 이미 포함 되어 있기 때문에 따로 구현해 줄 필요가 없다는 점을 주의하시기 바랍니다.
+$\mathbf{b}_r$항의 경우 선형 변환에 이미 포함 되어 있기 때문에 따로 구현해 줄 필요가 없습니다.
 이제 마찬가지로 RNN 모델의 학습과 테스트에 사용되는 시각 판별 과제를 생성하는 `VisualDiscrimination()` 클래스를 수정하여 
 미소 시간 변수 `.dt`에 따라 다운샘플링을 하도록 수정합니다. 대부분 저번 주차에서 했던 코드와 크게 다르지 않으며 샘플링 구간을 나타내는 변수 `.dt` 만 추가가 되었습니다.
 
@@ -178,8 +178,7 @@ class VisualDiscrimination(Dataset):
 이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화 하는 것이고, 
 3번 제약 조건은 RNN 모델의 connection을 sparse하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
 
-$$ \begin{aligned} L_{\text{L1, rate}} = \beta_{\text{rate}} \sum_{i,t} \lvert \mathbr{r_{i,t}} \rvert  \\
-L_{\text{L1, weight}} = \beta_{\text{weight}}   \end{aligned} $$
+$$ L_{\text{L1, rate}} = \beta_{\text{rate}} \sum_{i,t} \lvert \mathbf{r_{i,t}} \rvert  \\ L_{\text{L1, weight}} = \beta_{\text{weight}}  \sum_{l} \sum_{i,j} \lvert \mathbf{w_{i,j}^{l}} \rvert $$
 
 
 
