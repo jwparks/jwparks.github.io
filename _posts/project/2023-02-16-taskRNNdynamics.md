@@ -339,6 +339,8 @@ $\mathbf{J}$는 함수 $\mathbf{F}$의 Jacobian matrix로 함수 $\mathbf{F}$의
 
 $$ \text{argmin}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
 
+그럼 이건 또 어떻게 
+
 
 {% highlight python %}
 from torch.autograd import Variable
