@@ -179,8 +179,8 @@ class VisualDiscrimination(Dataset):
 Figure 1. 시각 판별 과제의 예시
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
-이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화 하는 것이고, 
-3번 제약 조건은 RNN 모델의 weight를 희소하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
+이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 **RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화** 하는 것이고, 
+**3번 제약 조건은 RNN 모델의 weight를 희소하게** 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
 
 $$ \begin{aligned} L_{\text{L1, rate}} &= \beta_{\text{rate}} \sum_{i,t} \lvert \mathbf{r_{i,t}} \rvert  \\ L_{\text{L1, weight}} &= \beta_{\text{weight}}  \sum_{l} \sum_{i,j} \lvert \mathbf{w_{i,j}^{l}} \rvert  \end{aligned} $$
 
@@ -256,6 +256,14 @@ Figure 2. 제약 조건이 추가된 RNN 모델의 학습 곡선
 만약 RNN 모델이 여러 인지 과제를 동시에 수행해야 하는 경우 이러한 기법을 통해 더 효율적인 구조를 갖추는 것이 성능에 영향을 주게 됩니다. 
 
 ## RNN 모델의 state dynamics 분석
+이제 학습된 RNN 모델의 recurrent neural activity $\mathbf{r}(t)$이 인지 과제를 수행하는 동안 어떤 dynamics를 가지고 있는지 살펴보겠습니다.
+먼저 쉽게 해 볼 수 있는 분석은 시각 판별 과제의 조건에 따라 RNN 모델의 neural trajectory가 어떤지 확인하는 것 입니다.
+먼저 `VisualDiscrimination()` 클래스를 이용하여 테스트 데이터를 생성 시킨 후, neural trajectory를 주성분분석(PCA)을 통해 3개의 차원으로 축소해 보았습니다.
+너무 길어져서 아래 코드에는 따로 나타내지 않았지만, 사실 `task_params_test` 딕셔너리를 조절하며 다음과 같은 분석 절차를 거쳤습니다.
+1. RNN 모델의 학습에 사용된 것과 같은 과제 조건을 이용하여 데이터를 생성 시킨 후, 이를 이용하여 PCA 모델을 학습합니다. (`pca_mode.fit(X)`)
+2. 시간에 따라 변화하는 neural state(trajectory)의 분석을 용이하게 하기 위해 시간`task_params_test` 딕셔너리를 조절하여 `target_onset`을 800ms, `decision_onset`을 1600ms로 고정한 시행을 생성합니다.
+3. 이때 2번에서 생성하는 시행의 경우 color coherence가 (0.95, 1.0) 사이인 High color coherence 조건과 color coherence가 (0.0, 0.95) 구간에서 샘플링 되는 Low color coherence 조건을 나누었습니다.
+4. 조건별 시행을 1에서 학습 된 PCA 모델로 차원을 축소합니다. (`pca_model.transform(X)`)
 
 {% highlight python %}
 from sklearn.decomposition import PCA
@@ -288,8 +296,48 @@ for i in range(test_batch_size):
     reduced_hidden_state[i] = pca_model.transform(hidden_state[i])
 {% endhighlight %}
 
+PCA 분석을 통해 저차원에 임베딩한 RNN model의 neural trajectory는 다음과 같습니다.
+우리가 사용한 시각 판별 과제는 과제 시작 후 800ms에서 타겟 정보가 주어집니다.
+해당 타겟 정보는 빨간색이 왼쪽인지(이 경우에 초록색은 오른쪽 입니다), 혹은 오른쪽인지(이 경우엔 초록색은 왼쪽 입니다) 알려주는 시각 단서를 포함하고 있습니다.
+이후 1600ms에서 주어지는 checkerboard의 색에 따라 RNN 모델은 왼쪽 혹은 오른쪽을 응답하게 됩니다.
+만약 타겟 정보가 빨간색이 왼쪽이고(즉 초록색은 오른쪽) 제시되는 checkerboard의 색이 빨간색인 경우 RNN 모델은 왼쪽을 응답하면 됩니다. 
+1600ms에서 주어지는 checkerboard는 색을 판별하는 것은 각 시행의 color coherence 값에 따라 난이도가 달라지게 됩니다. 
 
 ![](https://i.postimg.cc/7hjSRqq6/Screen-Shot-2023-03-01-at-6-18-09-PM.png)
+
+RNN 모델의 neural trajectory를 보면 color coherence가 높은 시행에서 각각의 조건과 분기에 맞추어 neural state가 선명하게 나누어 지는 것을 볼 수 있습니다.
+즉 모델은 800ms에서 해당 시행의 타겟 정보에 따라 state가 분리되고 이어서 1600ms에서 checkerboard의 색 정보가 주어질 때 서로 다른 response를 낼 수 있는 형태로 
+state가 나누어 지는 것을 볼 수 있습니다. 반면 color coherence가 낮은 시행의 경우 모델은 주어지는 타겟 정보에 따라 state를 분리하였으나
+checkerboard의 color를 제대로 식별하지 못해 state가 잘 나누어 지지 않는 모습을 확인 할 수 있습니다. 
+
+이렇게 저차원에서 neural trajectory를 그려서 직관적으로 모델의 state dynamics를 확인해 볼 수 있었습니다.
+하지만 이러한 neural state dynamics를 어떻게 더 정량적으로 분석 할 수 있을까요?
+예를 들어서 위에서 우리가 neural trajectory를 보고 직관적으로 알 수 있었던 "state가 4개로 분리 되는 것"은 dynamical system에서 어떤 의미일까요?
+
+RNN 모델에서 state의 변화는 비선형적으로 동작하며, 이러한 비선형 동역학 시스템에서는 시간과 차원을 따라 정보의 흐름을 추적하고, 해석하기 대단히 어렵습니다.
+이러한 RNN 모델의 state dynamics를 해석 하기 위한 방법으로 많은 선행연구에서는 Fixed point를 이용합니다.
+동역학 시스템에서 fixed point는 시간에 따른 state dynamics가 수렴할 수 있는 안정적인 상태를 말합니다 (repeller와 같은 unstable fixed point도 있으나, 이는 일단 이야기 하지 않겠습니다).
+이러한 fixed point 근처에서 네트워크의 state dynamics는 그 변화의 크기가 크지 않아 이를 선형 동역학 시스템으로 근사 할 수 있습니다.
+우리가 비선형 시스템을 선형 시스템으로 근사하게 되면 시스템의 변화를 쉽게 예측 할 수 있고, 또한 이를 각 요소로 분해하여 해석 할 수 있습니다.
+이제 우리가 학습 시킨 RNN 모델에서 안정적인 상태를 갖는 fixed point를 찾는 방법을 알아 보겠습니다. 먼저 시간에 따른 state의 변화의 정도를 각 state에 대한 함수 $\mathbf{F}(\mathbf{r})$로 나타 낼 수 있습니다.
+
+$$ \frac{d\mathbf{r}}{dt} = \mathbf{F}(\mathbf{r}) $$
+
+시간 $t$에서 neural state $\mathbf{r}$는 상태 공간(state space)의 한 점으로 생각 할 수 있습니다.
+그 점은 다음 time step인 $t+1$에서 새로운 점(새로운 상태)으로 이동합니다. 즉 함수 $\mathbf{F}(\mathbf{r})$의 의미는 state $\mathbf{r}$을 시간으로 미분한, 즉 그 상태의 이동 속도라고 생각 할 수 있습니다.
+Fixed point는 이러한 상태의 이동 속도 $\mathbf{F}(\mathbf{r})$가 0이 되는 시점이라 생각 할 수 있습니다.
+이러한 Fixed point $\mathbf{r}_x$ 근방의 state인 $\mathbf{r}_x + \Delta \mathbf{r}$의 dynamics는 다음과 같이 선형 근사가 가능합니다.
+
+$$ \mathbf{F}(\mathbf{r}) = \mathbf{F}(\mathbf{r}_x + \Delta \mathbf{r}) \approx \mathbf{F}(\mathbf{r}_x) + \mathbf{J}(\mathbf{r}_x)\Delta \mathbf{r} $$
+
+$\mathbf{J}$는 함수 $\mathbf{F}$의 Jacobian matrix로 함수 $\mathbf{F}$의 1차 편미분 계수로 구성되어 있습니다. 이의 기하학적 의미 역시도 미소 영역에서 비선형 변환의 선형 근사를 의미합니다. 
+혹시 이에 대해 더 궁금하다면 관련 [학습 자료](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/jacobian-prerequisite-knowledge)를 추천합니다.
+
+그럼 이제 fixed point에서 우리는 RNN의 비선형 동역학을 선형 근사 할 수 있음을 알았으니 $\mathbf{F}(\mathbf{r}) = 0$인 $\mathbf{r}_x$를 찾아보면 되겠습니다.
+이를 손으로 풀어서 analytic solution을 얻을 수 있으면 좋겠으나, 신경망을 이용한 시스템이 대부분 그러하듯 우리는 $\mathbf{F}(\mathbf{r}) = 0$인 analytic solution을 찾을 수 없을 것입니다.
+다시 말해 $\mathbf{F}(\mathbf{r})$가 최소가 되는 상태 $\mathbf{r}$을 수치 해석과 최적화를 이용해 찾아야 하는 것입니다.
+
+$$ \text{argmin}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
 
 
 {% highlight python %}
@@ -345,6 +393,8 @@ for target_idx in [0, 1]:
 - Chaisangmongkon, W., Swaminathan, S. K., Freedman, D. J. & Wang, X.-J. Computing by Robust Transience: How the Fronto-Parietal Network Performs Sequential, Category-Based Decisions. Neuron 93, 1504-1517.e4 (2017).
 - Sussillo, D. & Barak, O. Opening the Black Box: Low-Dimensional Dynamics in High-Dimensional Recurrent Neural Networks. Neural Comput 25, 626–649 (2013).
 - Mante, V., Sussillo, D., Shenoy, K. V. & Newsome, W. T. Context-dependent computation by recurrent dynamics in prefrontal cortex. Nature 503, 78–84 (2013).
+- Goudar, V. & Buonomano, D. V. Encoding sensory and motor patterns as time-invariant trajectories in recurrent neural networks. Elife 7, e31134 (2018).
+  
   
   
   
