@@ -175,8 +175,13 @@ class VisualDiscrimination(Dataset):
                 'target_idx': target_idx, 'output_direction': output_direction, 'decision_onset': decision_onset}
 {% endhighlight %}
 
+이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화 하는 것이고, 
+3번 제약 조건은 RNN 모델의 connection을 sparse하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
 
-이제 
+$$ \begin{aligned} L_{\text{L1, rate}} = \beta_{\text{rate}} \sum_{i,t} \lvert \mathbr{r_{i,t}} \rvert  \\
+L_{\text{L1, weight}} = \beta_{\text{weight}}   \end{aligned} $$
+
+
 
 {% highlight python %}
 task_params = {'target_dim': 2,
