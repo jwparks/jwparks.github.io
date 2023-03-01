@@ -339,7 +339,7 @@ $\mathbf{J}$는 함수 $\mathbf{F}$의 Jacobian matrix로 함수 $\mathbf{F}$의
 이를 손으로 풀어서 analytic solution을 얻을 수 있으면 좋겠으나, 신경망을 이용한 시스템이 대부분 그러하듯 우리는 $\mathbf{F}(\mathbf{r}) = 0$인 analytic solution을 찾을 수 없을 것입니다.
 다시 말해 $\mathbf{F}(\mathbf{r})$가 최소가 되는 상태 $\mathbf{r}$을 수치 해석과 최적화를 이용해 찾아야 하는 것입니다.
 
-$$ \text{argmin}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
+$$ \operatorname*{arg\,max}_{\mathbf{r}} \norm{\mathbf{F}(\mathbf{r})}^{2} $$
 
 그럼 이건 또 어떻게 찾을 수 있을까요(ㅋㅋ)? 여기엔 여러 방법이 있겠습니다만, 결국 수치 해석과 최적화가 하는 일은 다 똑같습니다...
 목표 함수를 정의하고, 목표 함수를 최소(혹은 최대)로 하는 최적화를 수행 합니다. 저는 `PyTorch`의 자동 미분을 이용하여 경사 하강법(gradient descent)을 사용해 보겠습니다.
@@ -390,7 +390,14 @@ for target_idx in [0, 1]:
 Figure 4. Vector field of the state dynamics (왼쪽), Fixed point의 위치와 state trajectory (오른쪽)
 {: style="color:gray; font-size: 90%; text-align: center;"}
 
-
+State transition의 방향을 나타내는 vector field와 state trajectory를 저차원에 그리기 위해 위에서 학습한 PCA 모델을 이용하였습니다.
+먼저 네 조건(두 개의 타겟 조건과 두 개의 색 조건, color coherence는 모두 0.95로 설정)이 각각 
+어떤 state로 수렴하는지 확인하기 위해 state transition을 vector field로 나타내 보았습니다. 
+그림 4의 왼쪽 vector field를 보면 각 조건에 해당하는 자극이 주어질 때 네트워크의 상태가 대략 4개의 클러스터로 수렴하는 양상을 볼 수 있습니다.
+Left(Green) - Right(Red) 타겟에서 빨간색 checkerboard가 주어 질 때의 시행에서 최종적으로 상태가 수렴 되는 fixed points를 오른쪽 그림에 나타내었습니다.
+이처럼 RNN 모델을 dynamical system으로 해석하여 실제로 상태 공간 상에서 일어나는 state dynamics를 정량적으로 분석 해 볼 수 있었습니다.
+ㅎㅎ 사실 이외에도 계산된 jacobian $\mathbf{J}$을 분석하여 더 재미있는 결론을 찾아 볼 수도 있을 것 같은데, 이는 여러분에게 맡기도록 하겠습니다.
+재미있는 
 
 ## 마치며
 손목 아작남
