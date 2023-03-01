@@ -31,8 +31,8 @@ RNN 모델에 실제 사람이나 동물이 수행하는 인지 과제와 동일
 
 ## 학습 목표 
 이번 주차의 학습 목표는 다음과 같습니다. 
-- 여러 선행 연구에서 제안된 RNN 모델을 구현해 봅니다.
-- RNN 모델의 neural state dynamics를 분석하고 실제 뇌에서 측정된 데이터와 비교 합니다.
+- 여러 제약 조건이 추가된 RNN 모델을 구현해 봅니다.
+- RNN 모델의 neural state dynamics를 분석 합니다.
 
 ## 문제를 정의하기
 모든 문제 풀이의 시작은 풀고자 하는 문제를 잘 정의하는 것 입니다. 우리는 위에서 저번 주차에서 구현한 RNN 모델의 두 가지 문제점을 지적하였습니다.
@@ -175,6 +175,10 @@ class VisualDiscrimination(Dataset):
                 'target_idx': target_idx, 'output_direction': output_direction, 'decision_onset': decision_onset}
 {% endhighlight %}
 
+![](https://i.postimg.cc/NGzDX48D/Screen-Shot-2023-03-01-at-6-56-12-PM.png)
+Figure 1. 시각 판별 과제의 예시
+{: style="color:gray; font-size: 90%; text-align: center;"}
+
 이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화 하는 것이고, 
 3번 제약 조건은 RNN 모델의 weight를 희소하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
 
@@ -241,6 +245,106 @@ for epoch in range(num_epochs):
                f'loss: {loss.item():3.3f}, L1 norm(rate): {L1_rate:3.3f}, L1 norm(weight): {L1_weight:3.3f}')
 {% endhighlight %}
 
+
 ![Screen-Shot-2023-03-01-at-6-18-21-PM.png](https://i.postimg.cc/5N5MKZkn/Screen-Shot-2023-03-01-at-6-18-21-PM.png)
+Figure 2. 제약 조건이 추가된 RNN 모델의 학습 곡선
+{: style="color:gray; font-size: 90%; text-align: center;"}
+
+학습을 통해 모델의 세 loss가 충분히 잘 줄어든 것을 확인 할 수 있습니다.
+모델은 2번과 3번 조건을 만족하기 위해 매우 효율적인 recurrent connection을 구축하게 됩니다.
+우리가 정의한 문제의 경우 그렇게 복잡하지 않아 어떤 제약조건 하에서라도 모델은 쉽게 문제를 풀 수 있지만,
+만약 RNN 모델이 여러 인지 과제를 동시에 수행해야 하는 경우 이러한 기법을 통해 더 효율적인 구조를 갖추는 것이 성능에 영향을 주게 됩니다. 
+
+## RNN 모델의 state dynamics 분석
+
+{% highlight python %}
+from sklearn.decomposition import PCA
+test_batch_size = 512
+
+dataset = VisualDiscrimination(task_params_test)
+with torch.no_grad():
+    inputs = torch.zeros((test_batch_size, trial_steps, input_dim))
+    targets = torch.zeros((test_batch_size, trial_steps, output_dim))
+    coherence = np.zeros(test_batch_size)
+    color = np.zeros(test_batch_size)
+    desired_direction = np.zeros(test_batch_size)
+    decision_onset = np.zeros(test_batch_size)
+    for i in range(test_batch_size):
+        data = dataset[0]
+        inputs[i], targets[i] = torch.tensor(data['input_seq']), torch.tensor(data['output_seq'])
+        color[i], coherence[i] = data['checkerboard_color'], data['coherence']
+        desired_direction[i], decision_onset[i] =  data['output_direction'], data['decision_onset']
+    inputs.to(device)
+
+    outputs, hidden_state = model(inputs)
+    outputs = outputs.cpu().numpy()
+    hidden_state = hidden_state.cpu().numpy()
+    targets = targets.cpu().numpy()
+
+pca_model = PCA(n_components=3)
+pca_model.fit(hidden_state.reshape(-1,hidden_dim))
+reduced_hidden_state = np.zeros((test_batch_size, trial_steps, 3))
+for i in range(test_batch_size):
+    reduced_hidden_state[i] = pca_model.transform(hidden_state[i])
+{% endhighlight %}
 
 
+![](https://i.postimg.cc/7hjSRqq6/Screen-Shot-2023-03-01-at-6-18-09-PM.png)
+
+
+{% highlight python %}
+from torch.autograd import Variable
+
+def sample_const_input(target_idx = 0, checkerboard_color = +1, coherence = 0.95):
+    const_input = np.zeros((1, 1, task_params['target_dim']+task_params['color_dim']))
+    const_input[0, 0, target_idx] = 1
+    const_input[0, 0, task_params['target_dim']:] = np.random.normal(loc=checkerboard_color*coherence, size=(1, task_params['color_dim']))
+    return torch.tensor(const_input).to(device)
+
+def find_fixed_point(model, x, h):
+    gamma = 0.05
+    count = 0
+    while True:
+        h = Variable(h).to(device)
+        h.requires_grad = True
+        h_new = h * (1 - model.dt/model.tau) + (model.dt/model.tau) * torch.relu(model.i2h(x[0,0,:]) + model.h2h(h))
+        h_diff = torch.norm(h - h_new)
+        h_diff.backward()
+        if h_diff.item() < 10e-4:
+            return h, True
+        gamma *= (1-10e-5)
+        h = h - gamma * h.grad
+        count += 1
+        if count == 100000:
+            print(f'Cannot find fixed point! h_diff={h_diff}')
+            return h, False
+
+fixed_points = []
+for target_idx in [0, 1]:
+    for checkerboard_color in [-1, 1]:
+        print("condition:", target_idx, checkerboard_color)
+        fixed_points.append([])
+        for i in range(5):
+            const_input = sample_const_input(target_idx, checkerboard_color).float()
+            hidden_random = torch.randn(hidden_dim).float()
+            fixed_point, is_fixed = find_fixed_point(model, const_input, hidden_random)
+            if is_fixed:
+                fixed_points[-1].append(fixed_point.detach().cpu().numpy())
+{% endhighlight %}
+
+
+![](https://i.postimg.cc/FsZLcbLz/Screen-Shot-2023-03-01-at-6-20-21-PM.png)
+
+## 마치며
+손목 아작남
+
+### Recommended reading
+- Chandrasekaran, C., Peixoto, D., Newsome, W. T. & Shenoy, K. V. Laminar differences in decision-related neural activity in dorsal premotor cortex. Nat Commun 8, 614 (2017).
+- Yang, G. R. & Wang, X.-J. Artificial Neural Networks for Neuroscientists: A Primer. Neuron 107, 1048–1070 (2020).
+- Yang, G. R., Joglekar, M. R., Song, H. F., Newsome, W. T. & Wang, X.-J. Task representations in neural networks trained to perform many cognitive tasks. Nat Neurosci 22, 297–306 (2019).
+- Chaisangmongkon, W., Swaminathan, S. K., Freedman, D. J. & Wang, X.-J. Computing by Robust Transience: How the Fronto-Parietal Network Performs Sequential, Category-Based Decisions. Neuron 93, 1504-1517.e4 (2017).
+- Sussillo, D. & Barak, O. Opening the Black Box: Low-Dimensional Dynamics in High-Dimensional Recurrent Neural Networks. Neural Comput 25, 626–649 (2013).
+- Mante, V., Sussillo, D., Shenoy, K. V. & Newsome, W. T. Context-dependent computation by recurrent dynamics in prefrontal cortex. Nature 503, 78–84 (2013).
+  
+  
+  
