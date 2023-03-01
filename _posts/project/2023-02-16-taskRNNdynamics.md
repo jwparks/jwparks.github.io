@@ -176,11 +176,13 @@ class VisualDiscrimination(Dataset):
 {% endhighlight %}
 
 이제 2번과 3번 제약 조건을 추가하여 RNN 학습을 진행합니다. 2번 제약 조건은 RNN 모델의 recurrent unit의 활성화, 즉 firing rate를 정규화 하는 것이고, 
-3번 제약 조건은 RNN 모델의 connection을 sparse하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
+3번 제약 조건은 RNN 모델의 weight를 희소하게 만드는 것 입니다. 우리는 L1 정규화(regularization)를 통해 RNN 모델에 2번과 3번 제약 조건을 걸 수 있습니다.
 
-$$ L_{\text{L1, rate}} = \beta_{\text{rate}} \sum_{i,t} \lvert \mathbf{r_{i,t}} \rvert  \\ L_{\text{L1, weight}} = \beta_{\text{weight}}  \sum_{l} \sum_{i,j} \lvert \mathbf{w_{i,j}^{l}} \rvert $$
+$$ \begin{aligned} L_{\text{L1, rate}} &= \beta_{\text{rate}} \sum_{i,t} \lvert \mathbf{r_{i,t}} \rvert  \\ L_{\text{L1, weight}} &= \beta_{\text{weight}}  \sum_{l} \sum_{i,j} \lvert \mathbf{w_{i,j}^{l}} \rvert  \end{aligned} $$
 
-
+우리는 신경망의 트레이닝 스텝에서 rate와 weight를 정규화하기 위한 loss를 구한 후, 이를 신경망의 오차 함수에 더해주면 됩니다.
+최종 `loss`에 단순히 더하기만 하면 학습이 된다는 점이 무척 신기할 수 있으나, 이는 `PyTorch`의 강력한 자동 미분(`autograd`) 기능을 통해
+각 오차를 손쉽게 신경망으로 역전파 할 수 있기 때문입니다.
 
 {% highlight python %}
 task_params = {'target_dim': 2,
