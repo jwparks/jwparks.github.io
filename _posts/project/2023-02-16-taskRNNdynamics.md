@@ -273,8 +273,8 @@ connection의 개수 대비 model performance는 훨씬 더 뛰어나기 때문�
 너무 길어져서 아래 코드에는 따로 나타내지 않았지만, 사실 `task_params_test` 딕셔너리를 조절하며 다음과 같은 분석 절차를 거쳤습니다.
 1. RNN 모델의 학습에 사용된 것과 같은 과제 조건을 이용하여 데이터를 생성 시킨 후, 이를 이용하여 PCA 모델을 학습합니다. (`pca_mode.fit(X)`)
 2. 시간에 따라 변화하는 neural state(trajectory)의 분석을 용이하게 하기 위해 시간`task_params_test` 딕셔너리를 조절하여 `target_onset`을 800ms, `decision_onset`을 1600ms로 고정한 시행을 생성합니다.
-3. 이때 2번에서 생성하는 시행의 경우 color coherence가 (0.95, 1.0) 사이인 High color coherence 조건과 color coherence가 (0.0, 0.95) 구간에서 샘플링 되는 Low color coherence 조건을 나누었습니다.
-4. 조건별 시행을 1에서 학습 된 PCA 모델로 차원을 축소합니다. (`pca_model.transform(X)`)
+3. 이때 2번에서 생성하는 시행의 경우 color coherence가 (0.95, 1.0) 사이인 High color coherence 조건과 color coherence가 (0.0, 0.05) 구간에서 샘플링 되는 Low color coherence 조건을 나누었습니다.
+4. 조건별 시행을 1에서 학습 된 PCA 모델로 차원을 축소하여 저차원 공간에 임베딩 합니다. (`pca_model.transform(X)`)
 
 {% highlight python %}
 from sklearn.decomposition import PCA
