@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="06fe14fb-1848-40f1-86c5-7c3b1cdddc21" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/_posts/log/2023-12-26-231226.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_posts/log/2023-12-17-231217.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2023-12-17-231217.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/about.md" beforeDir="false" afterPath="$PROJECT_DIR$/about.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/log/2023-02-19-230219.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2023-02-19-230219.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/log/2023-08-26-230826.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/log/2023-08-26-230826.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,7 +100,8 @@
       <workItem from="1702797724019" duration="6180000" />
       <workItem from="1703035019247" duration="2108000" />
       <workItem from="1703168941751" duration="1918000" />
-      <workItem from="1703236186142" duration="3383000" />
+      <workItem from="1703236186142" duration="4304000" />
+      <workItem from="1703554557832" duration="3279000" />
     </task>
     <task id="LOCAL-00058" summary="init">
       <created>1673557857275</created>
@@ -444,7 +446,7 @@
       <option name="project" value="LOCAL" />
       <updated>1675275833182</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
