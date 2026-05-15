@@ -142,12 +142,22 @@ const NC = CHARS.length;
 const CX = COLS * 0.5, CY = ROWS * 0.5;
 
 // ── Rotation ──────────────────────────────────────────────────────────────────
-let rotX = 0.25, rotY = 0.0, targetX = 0.25, targetY = 0.0, mouseUsed = false, lastMouseTime = 0;
+let rotX = 0.25, rotY = 0.0, targetX = 0.25, targetY = 0.0;
+let mouseUsed = false, lastMouseTime = 0, lastMouseX = 0, lastMouseY = 0;
+
 document.addEventListener('mousemove', e => {
+  const now = Date.now();
+  const wasIdle = !mouseUsed || (now - lastMouseTime > 1500);
+  if (!wasIdle) {
+    // Delta-based: add movement to current target, no jump on re-engage
+    targetY += (e.clientX - lastMouseX) * 0.010;
+    targetX += (e.clientY - lastMouseY) * 0.005;
+    targetX = Math.max(-1.2, Math.min(1.2, targetX));
+  }
+  lastMouseX = e.clientX;
+  lastMouseY = e.clientY;
   mouseUsed = true;
-  lastMouseTime = Date.now();
-  targetY = (e.clientX / window.innerWidth  - 0.5) * Math.PI * 3.5;
-  targetX = (e.clientY / window.innerHeight - 0.5) * Math.PI * 1.2 + 0.25;
+  lastMouseTime = now;
 });
 
 function makeRot(rx, ry) {
