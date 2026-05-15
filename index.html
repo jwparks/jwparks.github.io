@@ -142,9 +142,10 @@ const NC = CHARS.length;
 const CX = COLS * 0.5, CY = ROWS * 0.5;
 
 // ── Rotation ──────────────────────────────────────────────────────────────────
-let rotX = 0.25, rotY = 0.0, targetX = 0.25, targetY = 0.0, mouseUsed = false;
+let rotX = 0.25, rotY = 0.0, targetX = 0.25, targetY = 0.0, mouseUsed = false, lastMouseTime = 0;
 document.addEventListener('mousemove', e => {
   mouseUsed = true;
+  lastMouseTime = Date.now();
   targetY = (e.clientX / window.innerWidth  - 0.5) * Math.PI * 3.5;
   targetX = (e.clientY / window.innerHeight - 0.5) * Math.PI * 1.2 + 0.25;
 });
@@ -182,9 +183,15 @@ const ibuf = new Float32Array(COLS * ROWS);
 const el   = document.getElementById('brain');
 
 function render() {
+  // Idle: return to lateral view (targetX → 0) and keep spinning Y.
+  // Active: mouse controls both axes freely including top/bottom.
+  const idle = !mouseUsed || (Date.now() - lastMouseTime > 1500);
+  if (idle) {
+    targetY += 0.008;                         // gentle spin
+    targetX += (0.0 - targetX) * 0.012;      // drift X back to lateral (rotX=0)
+  }
   rotX += (targetX - rotX) * 0.065;
   rotY += (targetY - rotY) * 0.065;
-  if (!mouseUsed) targetY += 0.008;
 
   const M = makeRot(rotX, rotY);
   const m0=M[0],m1=M[1],m2=M[2],m3=M[3],m4=M[4],m5=M[5],m6=M[6],m7=M[7],m8=M[8];
