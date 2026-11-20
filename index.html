@@ -4,111 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jiwoong Park — Neuroscience, UC Berkeley</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #777777;
+      --line: #e6e6e6;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    html { background: var(--bg); }
     body {
-      background: #f5f5f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      overflow-y: auto;
-      padding: 2.2rem 1.5rem 4rem;
-      gap: 1.4rem;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 4.5rem 1.5rem 4rem;
     }
 
-    #nameplate {
-      text-align: center;
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
-    #nameplate h1 {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 1.05rem;
-      font-weight: normal;
-      color: #111;
-      letter-spacing: 0.35em;
-    }
-    #nameplate p {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 0.65rem;
-      color: #111;
-      letter-spacing: 0.28em;
-      opacity: 0.4;
-      margin-top: 0.5rem;
+    header p {
+      color: var(--muted);
+      margin-top: 0.1rem;
     }
 
-    #about {
-      max-width: 740px;
-      text-align: center;
-    }
-    #about p {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 0.78rem;
-      color: #333;
-      line-height: 1.75;
-      margin-bottom: 0.7rem;
-    }
-    #about a {
-      color: #111;
+    #about { margin-top: 2rem; }
+    #about p { margin-bottom: 1rem; max-width: 36em; }
+
+    a {
+      color: inherit;
       text-decoration: underline;
+      text-decoration-color: #c4c4c4;
       text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
     }
-    #about a:hover { opacity: 0.55; }
-    .btn-link {
-      display: inline-block;
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      color: #111;
-      border: 1px solid #bbb;
-      padding: 0.4rem 1.0rem;
-      text-decoration: none;
-      transition: background 0.2s, color 0.2s;
-    }
-    .btn-link:hover { background: #111; color: #f5f5f0; }
+    a:hover { text-decoration-color: currentColor; }
 
+    .links { margin-top: 1.4rem; color: var(--muted); }
+    .links a { color: var(--text); margin-right: 1.1rem; }
+
+    figure {
+      margin-top: 3.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
     #brain {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      display: inline-block;
+      text-align: left;
+      font-family: var(--mono);
       font-size: 11.5px;
       line-height: 1.0;
       letter-spacing: 0;
-      color: #111;
+      color: #222;
       white-space: pre;
       user-select: none;
     }
+    figcaption {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
 
-    #hint {
-      position: fixed;
-      bottom: 1.4rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 0.60rem;
-      letter-spacing: 0.22em;
-      color: #111;
-      opacity: 0.22;
-      white-space: nowrap;
-      animation: blink 3.5s ease-in-out infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 0.15; }
-      50%       { opacity: 0.35; }
-    }
     @media (max-width: 768px) {
+      body { padding-top: 3rem; }
       #brain { font-size: 6.5px; }
     }
   </style>
 </head>
 <body>
 
-<div id="nameplate">
-  <h1>JIWOONG PARK, Ph.D.</h1>
-  <p>Cognitive Computational neuroscientist &nbsp;&middot;&nbsp; at UC berkeley </p>
-</div>
+<header>
+  <h1>Jiwoong Park</h1>
+  <p>Postdoctoral Researcher, UC Berkeley</p>
+</header>
 
-<div id="about">
+<section id="about">
   <p>
     I am a cognitive computational neuroscientist studying complex decision making
     and hierarchical action planning in human daily life. I use video games as
@@ -116,22 +98,25 @@
     to understand how the brain organizes goal-directed actions across multiple timescales.
   </p>
   <p>
-    I am a Postdoctoral Researcher working with Jack L. Gallant at the
+    I work with Jack L. Gallant at the
     <a href="https://gallantlab.org" target="_blank">Gallant Lab</a>, UC Berkeley.
     I completed my Ph.D. in Biomedical Engineering at Sungkyunkwan University
     with Won Mok Shim at the
     <a href="https://www.wshimlab.com" target="_blank">PECON Lab</a>,
     and my B.Sc. in Physics and Chemistry at Hanyang University, Korea.
   </p>
-  <div style="display:inline-flex; gap:0.6rem;">
-    <a class="btn-link" href="https://scholar.google.com/citations?user=dN5yqLYAAAAJ&hl=en" target="_blank">GOOGLE SCHOLAR</a>
-    <a class="btn-link" href="JiwoongPark_CV_Oct2026.pdf" target="_blank">CURRICULUM VITAE</a>
-  </div>
-</div>
+  <p class="links">
+    <a href="JiwoongPark_CV_Oct2026.pdf" target="_blank">CV</a>
+    <a href="https://scholar.google.com/citations?user=dN5yqLYAAAAJ&hl=en" target="_blank">Google Scholar</a>
+    <a href="https://github.com/jwparks" target="_blank">GitHub</a>
+    <a href="https://bsky.app/profile/jiwoongpark.bsky.social" target="_blank">Bluesky</a>
+  </p>
+</section>
 
+<figure>
 <pre id="brain"></pre>
-
-<div id="hint">MOVE MOUSE TO ROTATE</div>
+  <figcaption>ASCII art of the brain</figcaption>
+</figure>
 
 <script>
 'use strict';
